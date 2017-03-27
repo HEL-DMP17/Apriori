@@ -1,2 +1,9 @@
 # Remove emacs backup files from repo
 *~
+
+# Virtual env folder
+src/__virtenv__*
+
+# PyCharm IDE files
+src/__pycache__
+*.idea
