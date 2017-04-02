@@ -7,9 +7,9 @@ Our project is related with the student-level data, our goal is to find interest
 The data matrix has 9,679 rows and 17 columns, it does not contain missing values. A detailed description of the data set could be find in the following link: https://vincentarelbundock.github.io/Rdatasets/doc/mediation/student.html
 
 ## To-do List
-- [ ] Setup the virtual environment for both OS
+- [ ] ~~Setup the virtual environment for both OS~~ 27.04.17
 - [ ] Checkout the usage of setuptools
-- [ ] Figure out the documentation tool, Sphinx
+- [ ] ~~Figure out the documentation tool, Sphinx~~ 2.04.17
 - [ ] Extract the frequent patterns from the cropped dataset manually
 - [ ] Implement the unit test functions for all necessary steps
 - [ ] Preprocess the dataset (full/cropped)

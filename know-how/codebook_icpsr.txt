@@ -1,0 +1,6 @@
+In order to read some specific fields from this dataset, don't bother preprocessing the raw file
+in terms of delimiter fields, instead get the values using the starting and ending index from the line
+
+# EXAMPLE, student's birth date is between index 32 to 37
+chars = str(line)
+print("Birth date: " + chars[31:37])

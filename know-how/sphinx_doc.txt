@@ -1,0 +1,16 @@
+- Type "sphinx-quickstart" and select the docs folder as the root of the sphinx
+- Change conf.py file under source to point the scripts for autodoc
+
+# Add this to conf.py under docs/source folder
+# If the src folder has __init__.py copy all the codes under scripts folder 
+# and select that folder as autodoc src, otherwise just select the src folder
+	import os
+	import sys
+	sys.path.append(os.path.abspath('../../src'))
+	
+# Get all the *.rst files using sphinx-apidoc under docs\source, for example
+	sphinx-apidoc -o "C:\Users\eozer\Documents\GitHub\Apriori\docs\source" "C:\Users\eozer\Documents\GitHub\Apriori\src"
+
+# Build the documentation using:
+
+	make html
