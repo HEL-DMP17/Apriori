@@ -6,7 +6,7 @@ from apriori import *
 
 if __name__ == "__main__":
     # Set Defaults
-    file = "../data/cropped.txt"
+    file = "../data/samples.txt"
     # file = "../data/raw_data.txt"
     intervals = 10
     sup = 1.2
