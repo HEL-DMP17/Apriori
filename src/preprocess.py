@@ -3,6 +3,9 @@ from utils import *
 
 # For private modules and methods
 from src.utils import _is_name
+import collections
+from  more_itertools import unique_everseen
+import itertools
 
 
 """
@@ -18,14 +21,23 @@ class PreProcessor:
         self.mapper = PreProcessor.Mapper()
         # Call this to sample main raw_data helper
         self.read_file(file)
+        self.file_lines = self.read_file(file)
+        self.get_transactions()
+
     def read_file(self, file):
         """
         File reader for student-level dataset
         :param file: Filepath for dataset
         :return:
         """
-        _is_name(field="ali", attr="veli")
+        #_is_name(field="ali", attr="veli")
         mp = self.mapper
+
+        items_matrix=[]
+        sex_matrix=[]
+        race_matrix=[]
+        score_matrix=[]
+
         with open(file, "r") as f:
             for line in f:
                 chars = str(line)
@@ -37,6 +49,13 @@ class PreProcessor:
                 print("Sex: " + mp.sex['VALS'][int(sex)] +
                       " Race: " + mp.race['VALS'][int(race)] +
                       " Score: " + score)
+
+                sex_matrix.append(mp.sex['VALS'][int(sex)])
+                race_matrix.append(mp.race['VALS'][int(race)])
+                score_matrix.append(score)
+
+        items_matrix.extend((sex_matrix,race_matrix,score_matrix))
+        return items_matrix
 
     def discretize(self):
         """
@@ -73,6 +92,45 @@ class PreProcessor:
             raise ValueError('This key is not inside our mapper VALS - check binarize method in preprocess.py')
 
     def get_transactions(self):
+        self.pre_lines = self.file_lines
+        print(float(self.pre_lines[2][1]))
+        for values in range(len(self.pre_lines[2])):
+            if float(self.pre_lines[2][values])>50:
+                self.pre_lines[2][values]='>=50'
+            else:
+                self.pre_lines[2][values]='<50'
+
+        '''print(collections.Counter(self.pre_lines[0]))
+        print(collections.Counter(self.pre_lines[1]))
+        print(list(unique_everseen(self.pre_lines[0])))
+        print(list(unique_everseen(self.pre_lines[1])))
+
+        print("colections", list(itertools.zip_longest(self.pre_lines[0])))'''
+
+        self.transactions=[]
+        print('---')
+        for field in range(0,3): #here will be replaced the total number of fields using the input list method
+            l1=(list((collections.Counter(itertools.zip_longest(self.pre_lines[field]))).items()))
+            for ele in range(len(l1)):
+                self.transactions.append(l1[ele])
+
+        l2=(list(collections.Counter(itertools.zip_longest(self.pre_lines[0], self.pre_lines[1])).items()))
+
+        l21=(list(collections.Counter(itertools.zip_longest(self.pre_lines[1], self.pre_lines[2])).items()))
+
+        l3=(list(collections.Counter(itertools.zip_longest(self.pre_lines[0], self.pre_lines[1],self.pre_lines[2])).items()))
+
+
+        for ele in range(len(l2)):
+            self.transactions.append(l2[ele])
+            self.transactions.append(l21[ele])
+
+        for ele in range(len(l3)):
+            self.transactions.append(l3[ele])
+
+        for line in range (len(self.transactions)):
+            print (self.transactions[line])
+
         """
         Returns transaction table preprocessed from the file at start
 
