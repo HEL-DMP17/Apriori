@@ -17,7 +17,3 @@ def sample_file(file="../data/raw_data.txt", count=10):
         for item in samples:
             fw.write(item)
 
-# Private method, no need to add doc string
-# Added to construct transaction item names
-def _is_name(col, attr):
-    return col.upper() + "_IS_" + attr.upper()
