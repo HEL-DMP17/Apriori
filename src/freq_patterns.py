@@ -30,9 +30,9 @@ if __name__ == "__main__":
         sup = args.support
     if args.confidence:
         conf = args.confidence
-
     # Preprocess the data
     pp = PreProcessor(file, intervals)
+
     # Run the apriori algorithm
     # apriori = Apriori(transactions, sup, conf)
     # Extract the frequent patterns - rules

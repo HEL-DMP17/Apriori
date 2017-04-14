@@ -6,8 +6,6 @@ import itertools
 # Internal modules
 from utils import *
 
-
-
 """
 This will be PREPROCESSOR class, TODO: add some explaination
 """
@@ -21,7 +19,6 @@ class PreProcessor:
         self.mapper = PreProcessor.Mapper()
         # Parse the file
         self.parse_file(file)
-        # See the preliminary results
         self._print_transactions()
         print(self.unique)
 
@@ -39,9 +36,12 @@ class PreProcessor:
                 # Get all the necessary fields here
                 sex = self.get_field(chars, mp.sex)
                 race = self.get_field(chars, mp.race)
+                # score = self.get_field(chars, mp.score)
                 # Add this into transaction. Put all the fields into the list
                 fields = [sex, race]
                 self.add_transaction(fields)
+        # Return number of transactions added
+        return self.trans_count
 
     def get_field(self, line, mapper):
         value = line[mapper['STR'] - 1: mapper['END']]
@@ -77,6 +77,7 @@ class PreProcessor:
                 self.unique[f] = 1
             else:
                 self.unique[f] += 1
+
     def discretize(self):
         """
         Discretize the continious valued attributes
@@ -106,8 +107,20 @@ class PreProcessor:
 
         # Return proper COL_IS_ATTR name
         if col_data in mapper['VALS'].keys():
-            nm = self._is_name(col = mapper['COL'],
-                               attr = mapper['VALS'][col_data])
+            if mapper['OTHERS'] != None:
+                if col_data in mapper['OTHERS']:
+                    # Others
+                    nm = self._is_name(col=mapper['COL'], attr="OTHERS")
+                elif col_data in mapper['VALS']:
+                    # Map as standalone field
+                    nm = self._is_name(col=mapper['COL'], attr=mapper['VALS'][col_data])
+                else:
+                    raise Exception("Something unusual in preprocessor::binarize happened")
+            else:
+                # Map as standalone field
+                nm = self._is_name(col = mapper['COL'], attr = mapper['VALS'][col_data])
+
+            # Return the name
             return nm
         else:
             raise ValueError('This key is not inside our mapper VALS - check binarize method in preprocess.py')
@@ -233,9 +246,18 @@ class PreProcessor:
             # Some fields can change
             # TODO: Add 'OTHERS' field that will have fields we want to combine
             self.sex = {'COL': 'SEX', 'TYPE': 'BINARY', 'STR': 24, 'END': 25,
+                        'OTHERS': None,
                         'VALS': {1: 'MALE', 2: 'FEMALE'}}
 
+            # Combine fields that are in others together
             self.race = {'COL': 'RACE', 'TYPE': 'CATEGORICAL', 'STR': 26, 'END': 27,
+                         'OTHERS': {4: 'HISP_NR', 5: 'HISP_RC', 3: 'BLACK'},
+                         'VALS': {1: 'AMER', 2: 'ASIA', 3: 'BLACK',
+                                 4: 'HISP_NR', 5: 'HISP_RC', 6: 'MULT',
+                                 7: 'WHITE'}}
+
+            self.race_others = {'COL': 'RACE', 'TYPE': 'CATEGORICAL', 'STR': 26, 'END': 27,
+                         'OTHERS': None,
                          'VALS': {1: 'AMER', 2: 'ASIA', 3: 'BLACK',
                                  4: 'HISP_NR', 5: 'HISP_RC', 6: 'MULT',
                                  7: 'WHITE'}}
