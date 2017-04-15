@@ -11,7 +11,7 @@ This will be PREPROCESSOR class, TODO: add some explaination
 class PreProcessor:
     def __init__(self):
         self.transactions = []
-        self.unique = {}
+        self.unique = collections.OrderedDict()
         self.trans_count = 0
         self.mapper = PreProcessor.Mapper()
         # Parse the file
@@ -81,7 +81,7 @@ class PreProcessor:
         items = collections.OrderedDict({f: True for f in fields}) # more pythonic way to populate
         self.count_unique(fields) # Updates unique dict
         # Use keys to sort the dict
-        items = collections.OrderedDict(sorted(items.items(), key=lambda t: t[0]))
+        items = collections.OrderedDict(sorted(items.items(), key=lambda _: _[0]))
         t = {'ID': self.trans_count, 'ITEMS': items}
         self.transactions.append(t)
 
@@ -96,6 +96,7 @@ class PreProcessor:
                 self.unique[f] = 1
             else:
                 self.unique[f] += 1
+        self.unique = collections.OrderedDict(sorted(self.unique.items(), key=lambda _: _[0]))
 
     def discretize(self, mapper, col_data):
         """
