@@ -1,7 +1,6 @@
 # Global modules
 import collections
-from  more_itertools import unique_everseen
-import itertools
+import math
 
 # Internal modules
 from utils import *
@@ -10,15 +9,15 @@ from utils import *
 This will be PREPROCESSOR class, TODO: add some explaination
 """
 class PreProcessor:
-    def __init__(self, file, intervals):
+    def __init__(self, file):
         self.file = file
-        self.intervals = intervals
         self.transactions = []
         self.unique = {}
         self.trans_count = 0
         self.mapper = PreProcessor.Mapper()
         # Parse the file
         self.parse_file(file)
+        # print(self.transactions)
         self._print_transactions()
         print(self.unique)
 
@@ -36,9 +35,9 @@ class PreProcessor:
                 # Get all the necessary fields here
                 sex = self.get_field(chars, mp.sex)
                 race = self.get_field(chars, mp.race)
-                # score = self.get_field(chars, mp.score)
+                score = self.get_field(chars, mp.score)
                 # Add this into transaction. Put all the fields into the list
-                fields = [sex, race]
+                fields = [sex, race, score]
                 self.add_transaction(fields)
         # Return number of transactions added
         return self.trans_count
@@ -51,7 +50,7 @@ class PreProcessor:
         elif mapper['TYPE'] == 'CATEGORICAL':
             return self.binarize(mapper, int(value)) # Change here later for OTHER field
         else:
-            self.discretize()
+            return self.discretize(mapper, float(value))
 
 
     def add_transaction(self, fields):
@@ -78,13 +77,37 @@ class PreProcessor:
             else:
                 self.unique[f] += 1
 
-    def discretize(self):
+    def discretize(self, mapper, col_data):
         """
-        Discretize the continious valued attributes
-        :return:
+        Used to discretize the continous values from the given mapper and value
+        :param mapper: Mapper of the continious field  (Mapper Class)
+        :param col_data: Value of the continous field (float)
+        :return: Returns discretized name of the field (string)
         """
-        print("discretize stub")
-        return "imam hatipler kapatilsin"
+        max = math.ceil(mapper['MAX'])
+        min = math.floor(mapper['MIN'])
+        interval = mapper['INTERVAL']
+        step = (max - min) / interval
+        # Initial check to decide in which range it belongs to
+        lower = float(format(min, '.2f'))
+        upper = float(format(lower + step, '.2f'))
+        if col_data > lower and col_data < upper:
+            str_interval = '[' + str(int(lower)) + '-' + str(int(upper)) + ']'
+            # print('Lower : ' + str(lower) + ' Upper : ' + str(upper)
+            #       + ' Value : ' + str(col_data) + ' Interval : ' + str_interval)
+            return self._is_name(mapper['COL'], str_interval)
+
+        # Check the boundries until the end of the interval value
+        for i in range(1, interval):
+            lower = float(format(upper, '.2f'))
+            upper = float(format(upper + step, '.2f'))
+            if col_data > lower and col_data < upper:
+                str_interval = '[' + str(int(lower)) + '-' + str(int(upper)) + ']'
+                # print('Lower : ' + str(lower) + ' Upper : ' + str(upper)
+                #       + ' Value : ' + str(col_data) + ' Interval : ' + str_interval)
+                return self._is_name(mapper['COL'], str_interval)
+
+        raise ValueError('Value is not between the intervals check preprocessor::discretize')
 
     def binarize(self, mapper, col_data):
         """
@@ -147,90 +170,11 @@ class PreProcessor:
         """
 
     def get_transactions(self):
+        """
+        Getter method for transactions list
+        :return: Transactions list
+        """
         return self.transactions
-        # self.pre_lines = self.file_lines
-        # print(float(self.pre_lines[2][1]))
-        # for values in range(len(self.pre_lines[2])):
-        #     if float(self.pre_lines[2][values])>50:
-        #         self.pre_lines[2][values]='>=50'
-        #     else:
-        #         self.pre_lines[2][values]='<50'
-        #
-        # '''print(collections.Counter(self.pre_lines[0]))
-        # print(collections.Counter(self.pre_lines[1]))
-        # print(list(unique_everseen(self.pre_lines[0])))
-        # print(list(unique_everseen(self.pre_lines[1])))
-        #
-        # print("colections", list(itertools.zip_longest(self.pre_lines[0])))'''
-        #
-        # self.transactions=[]
-        # print('---')
-        # for field in range(0,3): #here will be replaced the total number of fields using the input list method
-        #     l1=(list((collections.Counter(itertools.zip_longest(self.pre_lines[field]))).items()))
-        #     for ele in range(len(l1)):
-        #         self.transactions.append(l1[ele])
-        #
-        # l2=(list(collections.Counter(itertools.zip_longest(self.pre_lines[0], self.pre_lines[1])).items()))
-        #
-        # l21=(list(collections.Counter(itertools.zip_longest(self.pre_lines[1], self.pre_lines[2])).items()))
-        #
-        # l3=(list(collections.Counter(itertools.zip_longest(self.pre_lines[0], self.pre_lines[1],self.pre_lines[2])).items()))
-        #
-        #
-        # for ele in range(len(l2)):
-        #     self.transactions.append(l2[ele])
-        #     self.transactions.append(l21[ele])
-        #
-        # for ele in range(len(l3)):
-        #     self.transactions.append(l3[ele])
-        #
-        # for line in range (len(self.transactions)):
-        #     print (self.transactions[line])
-        #
-        # """
-        # Returns transaction table preprocessed from the file at start
-        #
-        # |TID|                   ITEMS                           |
-        # | 1 | SEX_IS_MALE, RACE_IS_WHITE, SCORE_IS_40-50, ..    |
-        # | 2 | a, b, c, d |
-        # | 3 | a, b, c, e
-        #     ...
-        #     ...
-        #
-        # a, b, c
-        # b, c
-        # c
-        #
-        # TID LIST
-        #
-        # b, c
-        # b, c
-        # c
-        #
-        # 1-freq
-        # ------
-        # a 1
-        # b 2
-        # c 3
-        #
-        # 2-freq
-        # ------
-        # b c: 1
-        #
-        # 3-freq
-        # ------
-        # None
-        #
-        # (('MALE',), 7)
-        # (('FEMALE',), 3)
-        # (('HISP_RC',), 1)
-        # (('WHITE',), 8)
-        # (('BLACK',), 1)
-        # (('<50',), 1)
-        # (('>=50',), 9)
-        #
-        # :return: Transaction table
-        # """
 
     # Added to construct transaction item names
     # There are some attiributes having 'MISSING_VALUE' types
@@ -261,4 +205,7 @@ class PreProcessor:
                          'VALS': {1: 'AMER', 2: 'ASIA', 3: 'BLACK',
                                  4: 'HISP_NR', 5: 'HISP_RC', 6: 'MULT',
                                  7: 'WHITE'}}
-            self.score = {'COL': 'SCORE', 'TYPE': 'CONTINIOUS', 'STR': 106, 'END': 111}
+
+            # SCORE_IS-20_60 , 35.12
+            self.score = {'COL': 'SCORE', 'TYPE': 'CONTINIOUS', 'STR': 106, 'END': 111,
+                          'MIN': 20.91, 'MAX': 81.04, 'INTERVAL': 5}
