@@ -28,7 +28,7 @@ if __name__ == "__main__":
     pp = PreProcessor(file)
 
     # Run the apriori algorithm
-    # apriori = Apriori(transactions, sup, conf)
+    apriori = Apriori(pp, sup, conf)
     # Extract the frequent patterns - rules
     # apriori.extract()
 
