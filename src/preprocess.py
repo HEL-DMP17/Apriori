@@ -9,17 +9,37 @@ from utils import *
 This will be PREPROCESSOR class, TODO: add some explaination
 """
 class PreProcessor:
-    def __init__(self, file):
-        self.file = file
+    def __init__(self):
         self.transactions = []
         self.unique = {}
         self.trans_count = 0
         self.mapper = PreProcessor.Mapper()
         # Parse the file
-        self.parse_file(file)
+        # self.parse_file(file)
         # print(self.transactions)
-        self._print_transactions()
-        print(self.unique)
+        # self._print_transactions()
+        # print(self.unique)
+
+    def get_transactions(self):
+        """
+        Getter method for transactions list of OrderedDict
+        :return: Transactions list
+        """
+        return self.transactions
+
+    def get_uniques(self):
+        """
+        Getter method for unique itemsets (dictionary)
+        :return: Counts of unique itemsets
+        """
+        return self.unique
+
+    def get_transaction_count(self):
+        """
+        Getter method for transaction count after parsing the file
+        :return: Transaction count (int)
+        """
+        return self.trans_count
 
     def parse_file(self, file):
         """
@@ -168,13 +188,6 @@ class PreProcessor:
         | 2 | SEX_IS_MALE, RACE_IS_BLACK ...   |
 
         """
-
-    def get_transactions(self):
-        """
-        Getter method for transactions list
-        :return: Transactions list
-        """
-        return self.transactions
 
     # Added to construct transaction item names
     # There are some attiributes having 'MISSING_VALUE' types

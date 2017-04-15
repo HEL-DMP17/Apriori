@@ -24,11 +24,14 @@ if __name__ == "__main__":
         sup = args.support
     if args.confidence:
         conf = args.confidence
+
     # Preprocess the data
-    pp = PreProcessor(file)
-
-    # Run the apriori algorithm
-    apriori = Apriori(pp, sup, conf)
-    # Extract the frequent patterns - rules
-    # apriori.extract()
-
+    pp = PreProcessor()
+    # If transaction count greater than 0
+    if pp.parse_file(file) > 0:
+        transactions = pp.get_transactions()
+        uniques = pp.get_uniques()
+        # Create the apriori class
+        apriori = Apriori(transactions, uniques, sup, conf)
+        # Extract the frequent patterns/rules
+        apriori.extract()

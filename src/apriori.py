@@ -5,14 +5,12 @@ This is a apriori class
 """
 
 class Apriori:
-    def __init__(self, data=None, sup=None, conf=None):
-        self.data = data
-        self.sup = sup
-        self.conf= conf
-        self.candidates = {}
-        #self._print("This is a stub for our Apriori class")
-        print('Data',data)
-        self.apriori_exe()
+    def __init__(self, transactions, uniques, min_sup=1.2, min_conf=1.5):
+        self.transactions = transactions
+        self.uniques = uniques
+        self.min_sup = min_sup
+        self.min_conf = min_conf
+        self._print("This is a stub for our Apriori class")
 
     def _print(self, msg):
        print(msg)
