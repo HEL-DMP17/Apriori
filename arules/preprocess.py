@@ -214,11 +214,11 @@ class PreProcessor:
                                  4: 'HISP_NR', 5: 'HISP_RC', 6: 'MULT',
                                  7: 'WHITE'}}
 
-            self.race_others = {'COL': 'RACE', 'TYPE': 'CATEGORICAL', 'STR': 26, 'END': 27,
-                         'OTHERS': None,
-                         'VALS': {1: 'AMER', 2: 'ASIA', 3: 'BLACK',
-                                 4: 'HISP_NR', 5: 'HISP_RC', 6: 'MULT',
-                                 7: 'WHITE'}}
+            # self.race_others = {'COL': 'RACE', 'TYPE': 'CATEGORICAL', 'STR': 26, 'END': 27,
+            #              'OTHERS': None,
+            #              'VALS': {1: 'AMER', 2: 'ASIA', 3: 'BLACK',
+            #                      4: 'HISP_NR', 5: 'HISP_RC', 6: 'MULT',
+            #                      7: 'WHITE'}}
 
             # SCORE_IS-20_60 , 35.12
             self.score = {'COL': 'SCORE', 'TYPE': 'CONTINIOUS', 'STR': 106, 'END': 111,

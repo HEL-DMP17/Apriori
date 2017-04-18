@@ -31,9 +31,8 @@ if __name__ == "__main__":
     if pp.parse_file(file) > 0:
         transactions = pp.get_transactions()
         uniques = pp.get_uniques()
-        print(transactions)
-        print(uniques)
-        # Create the apriori class
+        # pp._print_transactions()
+        # print(uniques)
+        # Extract association rules using apriori
         apriori = Apriori(transactions, uniques, sup, conf)
-        # Extract the frequent patterns/rules
-        apriori.extract()
+        # apriori.extract()

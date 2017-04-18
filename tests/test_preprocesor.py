@@ -1,7 +1,7 @@
 ##########################################
 # Import the path to see the other files
 import sys
-sys.path.append('../src')
+sys.path.append('../arules')
 # Import core unittest
 import unittest
 ##########################################
@@ -13,7 +13,7 @@ from preprocess import PreProcessor
 class TestPreprocess(unittest.TestCase):
 
     def setUp(self):
-        self.pp = PreProcessor("../data/samples.txt", 10)
+        self.pp = PreProcessor()
         self.pp.parse_file("../data/samples.txt")
 
     def test_file_parser(self):
@@ -42,11 +42,13 @@ class TestPreprocess(unittest.TestCase):
         self.assertEqual(t1['ID'], 1, "Must be first transaction")
         if is_others:
             self.assertEqual(t1['ITEMS']
-                             , collections.OrderedDict([('RACE_IS_OTHERS', True), ('SEX_IS_MALE', True)])
+                             , collections.OrderedDict([('RACE_IS_OTHERS', True), ('SCORE_IS_[44-57]', True),
+                                                        ('SEX_IS_MALE', True)])
                              , "Must be first transaction")
         else:
             self.assertEqual(t1['ITEMS']
-                             , collections.OrderedDict([('RACE_IS_HISP_RC', True), ('SEX_IS_MALE', True)])
+                             , collections.OrderedDict([('RACE_IS_HISP_RC', True), ('SCORE_IS_[44-57]', True),
+                                                       ('SEX_IS_MALE', True)])
                              , "Must be first transaction")
 
         print("PreProcessor::mappers")
