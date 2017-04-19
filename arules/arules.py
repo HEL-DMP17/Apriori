@@ -35,4 +35,4 @@ if __name__ == "__main__":
         # print(uniques)
         # Extract association rules using apriori
         apriori = Apriori(transactions, uniques, sup, conf)
-        # apriori.extract()
+        apriori.extract()

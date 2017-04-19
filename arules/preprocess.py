@@ -6,8 +6,10 @@ import math
 from utils import *
 
 """
-This will be PREPROCESSOR class, TODO: add some explaination
+This will be PREPROCESSOR class, TODO: add some docs
 """
+
+
 class PreProcessor:
     def __init__(self):
         self.transactions = []
@@ -64,22 +66,21 @@ class PreProcessor:
 
     def get_field(self, line, mapper):
         value = line[mapper['STR'] - 1: mapper['END']]
-        # Check the type and execute either disretize/binarize etc.
+        # Check the type and execute either discretize/binarize etc.
         if mapper['TYPE'] == 'BINARY':
             return self._is_name(mapper['COL'], mapper['VALS'][int(value)])
         elif mapper['TYPE'] == 'CATEGORICAL':
-            return self.binarize(mapper, int(value)) # Change here later for OTHER field
+            return self.binarize(mapper, int(value))  # Change here later for OTHER field
         else:
             return self.discretize(mapper, float(value))
-
 
     def add_transaction(self, fields):
         self.trans_count += 1
         items = collections.OrderedDict()
         # Add the fields here, True is only used to have
         # OrderedSet kind of data structure
-        items = collections.OrderedDict({f: True for f in fields}) # more pythonic way to populate
-        self.count_unique(fields) # Updates unique dict
+        items = collections.OrderedDict({f: True for f in fields})  # more pythonic way to populate
+        self.count_unique(fields)  # Updates unique dict
         # Use keys to sort the dict
         items = collections.OrderedDict(sorted(items.items(), key=lambda _: _[0]))
         t = {'ID': self.trans_count, 'ITEMS': items}
@@ -137,7 +138,7 @@ class PreProcessor:
         :param mapper: Corresponding mapper of this field
         :return: Binarized field - str
         """
-        if mapper == None:
+        if mapper is None:
             print("Give an appropriate mapper")
             return
 
@@ -151,7 +152,7 @@ class PreProcessor:
 
         # Return proper COL_IS_ATTR name
         if col_data in mapper['VALS'].keys():
-            if mapper['OTHERS'] != None:
+            if mapper['OTHERS'] is not None:
                 if col_data in mapper['OTHERS']:
                     # Others
                     nm = self._is_name(col=mapper['COL'], attr="OTHERS")
@@ -162,12 +163,21 @@ class PreProcessor:
                     raise Exception("Something unusual in preprocessor::binarize happened")
             else:
                 # Map as standalone field
-                nm = self._is_name(col = mapper['COL'], attr = mapper['VALS'][col_data])
+                nm = self._is_name(col=mapper['COL'], attr=mapper['VALS'][col_data])
 
             # Return the name
             return nm
         else:
             raise ValueError('This key is not inside our mapper VALS - check binarize method in preprocess.py')
+
+    def save_transactions(self, path):
+        """
+        Save the preprocessed transactions into a file
+        :param path: Path to be saved
+        :return: Returns true on successful save
+        """
+        print('Saving the transactions into {}'.format(path))
+        return True
 
     def _print_transactions(self):
         """
@@ -179,7 +189,7 @@ class PreProcessor:
         for t in self.transactions:
             print_str += str(" " + str(t['ID']) + " |")
             for i in t['ITEMS'].keys():
-                print_str += " " + i +" "
+                print_str += " " + i + " "
 
             print_str += " \n"
         print(print_str)
@@ -211,8 +221,8 @@ class PreProcessor:
             self.race = {'COL': 'RACE', 'TYPE': 'CATEGORICAL', 'STR': 26, 'END': 27,
                          'OTHERS': {4: 'HISP_NR', 5: 'HISP_RC', 3: 'BLACK'},
                          'VALS': {1: 'AMER', 2: 'ASIA', 3: 'BLACK',
-                                 4: 'HISP_NR', 5: 'HISP_RC', 6: 'MULT',
-                                 7: 'WHITE'}}
+                                  4: 'HISP_NR', 5: 'HISP_RC', 6: 'MULT',
+                                  7: 'WHITE'}}
 
             # self.race_others = {'COL': 'RACE', 'TYPE': 'CATEGORICAL', 'STR': 26, 'END': 27,
             #              'OTHERS': None,

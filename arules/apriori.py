@@ -1,7 +1,6 @@
 # Global modules here
 import collections
 import itertools
-from operator import itemgetter
 
 # Internal modules here
 
@@ -18,16 +17,37 @@ class Apriori:
         self.itemsets_by_size={}
         self.freq_itemsets =[]
         self.apriori_run()
+
+    def extract(self):
+        # Go all over the freq_itemsets
+        # Check frequent itemset if contains valuable association rule
+        # Append the rules greater than some measurements e.g. lift/confidence
+        print('Extract method is called')
         print('Frequent itemsets organized by frequency', self.itemsets_by_freq)
         print('Frequent itemsets organized by size', self.itemsets_by_size)
 
-    def extract(self):
+    def diffelems(self, list1, list2):
         """
-        Some methd to test out this
-        :param some_arg: Some not serious argument
-        :return:
+        Extracts the difference elements in lists, symmetrically.
+         For example:
+            list1 = ['a','b','c'], list2 = ['b','c']
+            diffset(list1, list2)
+            # regardless of order it will return same result
+            returns ->  ['a']
+
+        :param list1: First list to be compared
+        :param list2: Second list to be compared
+        :return: The difference elements of first and second lists
         """
-        #print("Extract the frequent patterns")
+        return list(set(list1).symmetric_difference(set(list2)))
+
+    def save_rules(self, path):
+        """
+        Saves the association rules into a file
+        :param path: Path to be saved
+        :return: Returns true on successful action
+        """
+        print('Rules saved to {}'.format(path))
 
     def compute_confidence(self):
         print('Computing itemsets support')
@@ -67,7 +87,6 @@ class Apriori:
         Fk = self.uniques
         # Find all frequent 1-itemsets
         Fk = self.freq1_itemsets(Fk)
-        #print('Fk0:', len(Fk), Fk)
         # Until no more Frequent itemset is generated
         while len(Fk) > 0:
             k += 1
@@ -100,7 +119,7 @@ class Apriori:
             # Sorting list to apply Fk-1 next candidates generation
             Fk.sort()
             # Saving into itemset by size dictionary
-            self.itemsets_by_size[k]=[Fk]
+            self.itemsets_by_size[k] = Fk
             print('Frequent itemsets size',k,":",len(Fk))
             for i in Fk:
                 print(i)
@@ -110,6 +129,6 @@ class Apriori:
         return(self.freq_itemsets)
 
     class f_itemsets:
-            def __init__(self,size,items):
-                self.size=size
-                self.items=items
+        def __init__(self,size,items):
+            self.size=size
+            self.items=items
