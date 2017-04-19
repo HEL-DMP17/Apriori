@@ -14,7 +14,6 @@ class Apriori:
         self.min_sup = min_sup
         self.min_conf = min_conf
         self.itemsets_by_freq={}
-        self.itemsets_by_size={}
         self.freq_itemsets =[]
         self.apriori_run()
 
@@ -23,8 +22,7 @@ class Apriori:
         # Check frequent itemset if contains valuable association rule
         # Append the rules greater than some measurements e.g. lift/confidence
         print('Extract method is called')
-        print('Frequent itemsets organized by frequency', self.itemsets_by_freq)
-        print('Frequent itemsets organized by size', self.itemsets_by_size)
+        print('Frequent itemsets', self.freq_itemsets)
 
     def diffelems(self, list1, list2):
         """
@@ -83,6 +81,7 @@ class Apriori:
         :return: Frequent itemsets (dict)
         """
         k = 1
+        fid = 0 # Unique frequent itemset id
         # All 1-itemsets
         Fk = self.uniques
         # Find all frequent 1-itemsets
@@ -111,24 +110,15 @@ class Apriori:
                     # Clear the items from the string format
                     set_s = [i.replace("['","").replace(",","").replace("']","").replace("'","") for i in item[0].split()]
                     Fk.append(set_s)
-                    # Saving into itemset by frequency dictionary
-                    if not item[1] in self.itemsets_by_freq:
-                        self.itemsets_by_freq[item[1]] = [set_s]
-                    else:
-                        self.itemsets_by_freq[item[1]].append([set_s])
+                    # Save frequent itemset
+                    fid += 1
+                    t = {'ID': fid, 'FREQ': item[1], 'ITEMS': [set_s]}
+                    self.freq_itemsets.append(t)
             # Sorting list to apply Fk-1 next candidates generation
             Fk.sort()
-            # Saving into itemset by size dictionary
-            self.itemsets_by_size[k] = Fk
-            print('Frequent itemsets size',k,":",len(Fk))
-            for i in Fk:
-                print(i)
-            # Saving into self.datastructure, this step could be not neccessary
-            self.freq_itemsets.append(self.f_itemsets(k, Fk))
-
+            # Print Fk
+            # print('Frequent itemsets size',k,":",len(Fk))
+            # for i in Fk:
+            #     print(i)
+        # Return frequent itemsets
         return(self.freq_itemsets)
-
-    class f_itemsets:
-        def __init__(self,size,items):
-            self.size=size
-            self.items=items
