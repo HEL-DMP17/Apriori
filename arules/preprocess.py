@@ -1,6 +1,7 @@
 # Global modules
 import collections
 import math
+import time
 
 # Internal modules
 from utils import *
@@ -49,8 +50,9 @@ class PreProcessor:
         :param file: Filepath for dataset
         :return:
         """
+        print("Preprocess begin to parse the file")
+        start_t = time.clock()
         mp = self.mapper
-
         with open(file, "r") as f:
             for line in f:
                 chars = str(line)
@@ -61,6 +63,10 @@ class PreProcessor:
                 # Add this into transaction. Put all the fields into the list
                 fields = [sex, race, score]
                 self.add_transaction(fields)
+        # Performance measurements
+        total_t = str(format(time.clock() - start_t, '.4f'))
+        print("Preprocessing took {:>10} seconds"
+                  .format(total_t))
         # Return number of transactions added
         return self.trans_count
 
@@ -170,35 +176,40 @@ class PreProcessor:
         else:
             raise ValueError('This key is not inside our mapper VALS - check binarize method in preprocess.py')
 
-    def save_transactions(self, path):
+    def save_transactions(self, path = "../transactions.csv"):
         """
         Save the preprocessed transactions into a file
         :param path: Path to be saved
         :return: Returns true on successful save
         """
         print('Saving the transactions into {}'.format(path))
+        start_t = time.clock()
+        with open(path, 'w') as f:
+            f.write("ID,ITEMS\n")
+            for t in self.transactions:
+                print_str = str(t['ID'])
+                for i in t['ITEMS'].keys():
+                    print_str += "," + i
+                print_str += "\n"
+                f.write(print_str)
+        # Performance measurements
+        total_t = str(format(time.clock() - start_t, '.4f'))
+        print("Save procedure took {:>10} seconds"
+              .format(total_t))
         return True
 
     def _print_transactions(self):
         """
-        Used to print transactions in pretty format
+        Used to print transactions in csv format
         :return:
         """
-        # TODO: fix printing using formatted print
-        print_str = "ID   ITEMS\n"
+        print_str = "ID,ITEMS\n"
         for t in self.transactions:
-            print_str += str(" " + str(t['ID']) + " |")
+            print_str += str(t['ID'])
             for i in t['ITEMS'].keys():
-                print_str += " " + i + " "
-
-            print_str += " \n"
+                print_str += "," + i
+            print_str += "\n"
         print(print_str)
-        """
-        | ID |              ITEMS              |
-        | 1 | SEX_IS_MALE, RACE_IS_BLACK ...   |
-        | 2 | SEX_IS_MALE, RACE_IS_BLACK ...   |
-
-        """
 
     # Added to construct transaction item names
     # There are some attiributes having 'MISSING_VALUE' types

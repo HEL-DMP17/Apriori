@@ -31,6 +31,8 @@ if __name__ == "__main__":
     if pp.parse_file(file) > 0:
         transactions = pp.get_transactions()
         uniques = pp.get_uniques()
+        if pp.save_transactions():
+            print('File saved successfully')
         # pp._print_transactions()
         # print(uniques)
         # Extract association rules using apriori

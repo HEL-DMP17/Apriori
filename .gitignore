@@ -9,4 +9,5 @@ arules/__pycache__
 
 *.idea
 *.pdf
+*.csv
 raw_data.txt

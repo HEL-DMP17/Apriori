@@ -1,7 +1,7 @@
 # Global modules here
 import collections
 import itertools
-
+import time
 # Internal modules here
 
 """
@@ -29,7 +29,7 @@ class Apriori:
         Extracts the difference elements in lists, symmetrically.
          For example:
             list1 = ['a','b','c'], list2 = ['b','c']
-            diffset(list1, list2)
+            diffelems(list1, list2)
             # regardless of order it will return same result
             returns ->  ['a']
 
@@ -80,6 +80,8 @@ class Apriori:
         Returns all frequent itemsets.
         :return: Frequent itemsets (dict)
         """
+        print("Apriori algorithm initiated")
+        start_t = time.clock()
         k = 1
         fid = 0 # Unique frequent itemset id
         # All 1-itemsets
@@ -112,7 +114,7 @@ class Apriori:
                     Fk.append(set_s)
                     # Save frequent itemset
                     fid += 1
-                    t = {'ID': fid, 'FREQ': item[1], 'ITEMS': [set_s]}
+                    t = {'ID': fid, 'FREQ': item[1], 'ITEMS': set_s}
                     self.freq_itemsets.append(t)
             # Sorting list to apply Fk-1 next candidates generation
             Fk.sort()
@@ -120,5 +122,9 @@ class Apriori:
             # print('Frequent itemsets size',k,":",len(Fk))
             # for i in Fk:
             #     print(i)
+        # Performance measurements
+        total_t = str(format(time.clock() - start_t, '.4f'))
+        print("Apriori took {:>10} seconds"
+                  .format(total_t))
         # Return frequent itemsets
         return(self.freq_itemsets)
