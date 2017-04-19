@@ -223,7 +223,6 @@ class PreProcessor:
     class Mapper:
         def __init__(self):
             # Some fields can change
-            # TODO: Add 'OTHERS' field that will have fields we want to combine
             self.sex = {'COL': 'SEX', 'TYPE': 'BINARY', 'STR': 24, 'END': 25,
                         'OTHERS': None,
                         'VALS': {1: 'MALE', 2: 'FEMALE'}}

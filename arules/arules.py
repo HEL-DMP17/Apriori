@@ -8,8 +8,8 @@ if __name__ == "__main__":
     # Set Defaults
     file = "../data/samples.txt"
     # file = "../data/raw_data.txt"
-    sup = 1.2
-    conf = 1.5
+    sup = 2.0
+    conf = 0.374
     # Read arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--file", help="The dataset path" + file, type=str)
@@ -31,10 +31,11 @@ if __name__ == "__main__":
     if pp.parse_file(file) > 0:
         transactions = pp.get_transactions()
         uniques = pp.get_uniques()
-        if pp.save_transactions():
-            print('File saved successfully')
+        # if pp.save_transactions():
+        #     print('File saved successfully')
         # pp._print_transactions()
         # print(uniques)
         # Extract association rules using apriori
         apriori = Apriori(transactions, uniques, sup, conf)
+        apriori._print_freq_is()
         apriori.extract()
