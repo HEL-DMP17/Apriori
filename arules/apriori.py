@@ -2,6 +2,10 @@
 import collections
 import itertools
 import time
+import matplotlib
+
+from graph_tool.all import *
+
 # Internal modules here
 
 """
@@ -20,10 +24,14 @@ class Apriori:
         # Run the main algorithm
         self.apriori_run()
 
+        #Test for supportcount
+        #self.support_count(['SCORE_IS_[44-57]', 'SEX_IS_FEMALE'])
+
     def extract(self):
         # Check frequent itemset if contains valuable association rule
         # Append the rules greater than some measurements e.g. lift/confidence
-        print('Frequent itemsets', self.freq_itemsets)
+        print('Frequent itemsets:', self.freq_itemsets)
+        print('Rules:')
         # Go all over the freq_itemsets
         for dict_itemset in self.freq_itemsets:
             itemset = dict_itemset['ITEMS']
@@ -34,22 +42,67 @@ class Apriori:
             for c in combs:
                 left = list(c)
                 right = self.diffelems(left, itemset)
-                self._prntarule(left, right)
+                #self._prntarule(left, right)
+                lr=left+right
                 # Symmetric rules must be checked too
                 # self._prntarule(right, left)
-                # TODO: We can use precalculated values in self.freq_itemsets and self.uniques
                 # Calculate measures
-                # conf = self.confidence(left, right)
-                # lift = self.lift(left, right) # this is a symmetric measure no need to calculate twice
-                # if conf > self.min_conf:
+                sup=self.support(lr)
+                #print('Support',sup)
+                conf = round(self.confidence(left, right),2)
+                #print('Confidence',conf)
+                lift = round(self.lift(left, right),2) # this is a symmetric measure no need to calculate twice
+                #print('Lift',lift)
+                if conf > self.min_conf:
                 # Add into arules list if greater than some value
-                # rule = {'LEFT': left, 'RIGHT': right, 'CONF': conf, 'LIFT': lift}
-                # rule_sym = {'LEFT': right, 'RIGHT': left, 'CONF': conf_sym, 'LIFT': lift}
-                # self.arules.append(rule)
-                # self.arules.append(rule_sym)
-
+                    rule = {'LEFT': left, 'RIGHT': right, 'SUP': sup,'CONF': conf, 'LIFT': lift}
+                    #rule_sym = {'LEFT': right, 'RIGHT': left, 'CONF': conf_sym, 'LIFT': lift}
+                    self.arules.append(rule)
+                    #self.arules.append(rule_sym)
+                    self._prntarule(left, right)
+                    print('SUP', sup,'CONF', conf, 'LIFT', lift)
         # Return association rules
+        self.save_rules()
+        self.plot_arules()
         return self.arules
+
+    def plot_arules(self):
+        # Raw idea to plot association rules using graph_tool library.
+        # the library includes graphic methods like spaning tree, maxflow, etc.
+        # Source: https://graph-tool.skewed.de/static/doc/quickstart.html
+        # TODO: check if this idea could be useful for plotting a-rules. Access to a-rules.png file
+        g=Graph()
+        ug = Graph(directed=True)
+        l = []
+        r = []
+
+        for t in self.arules:
+            if str(t['LEFT']) not in l:
+                l.append(str(t['LEFT']))
+            if str(t['RIGHT']) not in r:
+                r.append(str(t['RIGHT']))
+
+        ll=len(l)
+        lr=len(r)
+        g.add_vertex(ll+lr)
+
+        for t in self.arules:
+            il=l.index(str(t['LEFT']))
+            ir=r.index(str(t['RIGHT']))
+            #print(il,ll+ir)
+            g.add_edge(g.vertex(il), g.vertex(ll+ir))
+
+        tree = min_spanning_tree(g)
+        graph_draw(g, vertex_text=g.vertex_index,
+                   vertex_font_size=18, vertex_size=1, edge_pen_width=2.5,
+                   vcmap=matplotlib.cm.gist_heat_r, edge_color=tree,
+                   output_size = (200, 200), output = "a-rules.png")
+
+        print('Plot nodes indexes equivalence:')
+        for e in l:
+            print(l.index(e),":",e)
+        for e in r:
+            print(r.index(e)+ll, ":", e)
 
     def _prntarule(self, left, right):
         """
@@ -83,8 +136,16 @@ class Apriori:
         :param itemset: itemset to be counted (list)
         :return: support count of the itemset (int)
         """
-        # TODO: implement support_count measure
-        return 1
+        #print('---starting support_count')
+        spcount=0
+        for transaction in self.transactions:
+            #
+            subc = set(itemset)
+            subt = set(list(transaction['ITEMS']))
+            if subc.issubset(subt):
+                spcount+=1
+        #print('--- support_count finished. The itemset', itemset ,'has been found',spcount,'times')
+        return spcount
 
     def support(self, itemset, itemset_precalculated = None):
         """
@@ -98,8 +159,7 @@ class Apriori:
         else:
             sup_count = self.support_count(itemset)
         # Calculate support
-        support = sup_count / self.transaction_count
-
+        support = float(sup_count) / float(self.transaction_count)
         return support
 
     def confidence(self, left, right, left_precalculated = None):
@@ -110,7 +170,7 @@ class Apriori:
         :param left_precalculated: Existing suppport count value
         :return: Confidence value (float)
         """
-        print('Calculate the confidence of the eft and the right handside of the rules')
+        #print('Calculate the confidence of the left and the right handside of the rules')
         if left_precalculated is not None:
             conf = self.support_count(left + right) / left_precalculated
         else:
@@ -126,14 +186,14 @@ class Apriori:
         :param right_precalculated: Existing suppport count value
         :return: Confidence value (float)
         """
-        print('Calculate the lift of the left and the right handside of the rules')
+        #print('Calculate the lift of the left and the right handside of the rules')
 
         if right_precalculated  is not None:
             sup_right = self.support(right, itemset_precalculated = right_precalculated)
         else:
             sup_right = self.support(right)
         # Calculate lift
-        lift = self.conf(left, right) / sup_right
+        lift = float(self.confidence(left, right)) / float(sup_right)
 
         return lift
 
@@ -204,14 +264,16 @@ class Apriori:
                 if item[1] >= self.min_sup:
                     # Clear the items from the string format
                     set_s = [i.replace("['","").replace(",","").replace("']","").replace("'","") for i in item[0].split()]
-                    Fk.append(set_s)
+                    if (len(Fk)==0):
+                        Fk.append(set_s)
+                    else:
+                        Fk.insert(len(Fk), set_s)
                     # Save frequent itemset
                     fid += 1
-                    t = {'ID': fid, 'FREQ': item[1], 'ITEMS': set_s}
+                    t = {'ID': fid, 'FREQ': item[1], 'ITEMS': Fk[-1]}
                     self.freq_itemsets.append(t)
             # Sorting list to apply Fk-1 next candidates generation
-            Fk.sort()
-            # Print Fk
+            #Fk.sort()
             # print('Frequent itemsets size',k,":",len(Fk))
             # for i in Fk:
             #     print(i)
@@ -220,6 +282,9 @@ class Apriori:
         print("Apriori took {:>10} seconds"
                   .format(total_t))
         # Return frequent itemsets
+        print('Transactions:')
+        for transaction in self.transactions:
+            print(transaction)
         return(self.freq_itemsets)
 
     def save_freqis(self, path = "../frequent_itemsets.csv"):
@@ -250,8 +315,19 @@ class Apriori:
         :param path: Path to be saved
         :return: Returns true on successful action
         """
-        # TODO: Add a proper saver for the association rules
         print('Rules saved to {}'.format(path))
+
+        start_t = time.clock()
+        with open(path, 'w') as f:
+            f.write("LEFT,RIGHT,SUP,CONF,LIFT\n")
+            for t in self.arules:
+                print_str = str(t['LEFT']) + ',' + str(t['RIGHT']) + ',' + str(t['SUP']) + ',' + str(t['CONF']) + ',' + str(t['LIFT'])
+                print_str += "\n"
+                f.write(print_str)
+        # Performance measurements
+        total_t = str(format(time.clock() - start_t, '.4f'))
+        print("Save procedure took {:>10} seconds"
+              .format(total_t))
         return True
 
     def _print_freq_is(self):
