@@ -119,7 +119,7 @@ class PreProcessor:
         # Initial check to decide in which range it belongs to
         lower = float(format(min, '.2f'))
         upper = float(format(lower + step, '.2f'))
-        if col_data > lower and col_data < upper:
+        if col_data >= lower and col_data <= upper:
             str_interval = '[' + str(int(lower)) + '-' + str(int(upper)) + ']'
             # print('Lower : ' + str(lower) + ' Upper : ' + str(upper)
             #       + ' Value : ' + str(col_data) + ' Interval : ' + str_interval)
@@ -129,7 +129,7 @@ class PreProcessor:
         for i in range(1, interval):
             lower = float(format(upper, '.2f'))
             upper = float(format(upper + step, '.2f'))
-            if col_data > lower and col_data < upper:
+            if col_data >= lower and col_data <= upper:
                 str_interval = '[' + str(int(lower)) + '-' + str(int(upper)) + ']'
                 # print('Lower : ' + str(lower) + ' Upper : ' + str(upper)
                 #       + ' Value : ' + str(col_data) + ' Interval : ' + str_interval)

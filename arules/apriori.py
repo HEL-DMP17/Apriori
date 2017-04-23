@@ -27,6 +27,27 @@ class Apriori:
         #Test for supportcount
         #self.support_count(['SCORE_IS_[44-57]', 'SEX_IS_FEMALE'])
 
+    def addrule(self,left,right):
+        lr = left + right
+        # Symmetric rules must be checked too
+        #self._prntarule(left,right)
+        # Calculate measures
+        sup = self.support(lr)
+        #print('Support',sup)
+        conf = self.confidence(left, right)
+        #print('Confidence',conf)
+        lift = self.lift(left, right)  # this is a symmetric measure no need to calculate twice
+        # print('Lift',lift)
+        if conf > self.min_conf:
+            # Add into arules list if greater than some value
+            rule = {'LEFT': left, 'RIGHT': right, 'SUP': sup, 'CONF': conf, 'LIFT': lift}
+            # rule_sym = {'LEFT': right, 'RIGHT': left, 'CONF': conf_sym, 'LIFT': lift}
+            self.arules.append(rule)
+            # self.arules.append(rule_sym)
+            self._prntarule(left, right)
+            print('SUP', sup, 'CONF', conf, 'LIFT', lift)
+
+
     def extract(self):
         # Check frequent itemset if contains valuable association rule
         # Append the rules greater than some measurements e.g. lift/confidence
@@ -43,27 +64,10 @@ class Apriori:
                 left = list(c)
                 right = self.diffelems(left, itemset)
                 #self._prntarule(left, right)
-                lr=left+right
-                # Symmetric rules must be checked too
-                # self._prntarule(right, left)
-                # Calculate measures
-                sup=self.support(lr)
-                #print('Support',sup)
-                conf = round(self.confidence(left, right),2)
-                #print('Confidence',conf)
-                lift = round(self.lift(left, right),2) # this is a symmetric measure no need to calculate twice
-                #print('Lift',lift)
-                if conf > self.min_conf:
-                # Add into arules list if greater than some value
-                    rule = {'LEFT': left, 'RIGHT': right, 'SUP': sup,'CONF': conf, 'LIFT': lift}
-                    #rule_sym = {'LEFT': right, 'RIGHT': left, 'CONF': conf_sym, 'LIFT': lift}
-                    self.arules.append(rule)
-                    #self.arules.append(rule_sym)
-                    self._prntarule(left, right)
-                    print('SUP', sup,'CONF', conf, 'LIFT', lift)
+                self.addrule(left,right)
         # Return association rules
         self.save_rules()
-        self.plot_arules()
+        #self.plot_arules()
         return self.arules
 
     def plot_arules(self):
@@ -96,7 +100,7 @@ class Apriori:
         graph_draw(g, vertex_text=g.vertex_index,
                    vertex_font_size=18, vertex_size=1, edge_pen_width=2.5,
                    vcmap=matplotlib.cm.gist_heat_r, edge_color=tree,
-                   output_size = (200, 200), output = "a-rules.png")
+                   output_size = (1200, 1200), output = "a-rules.png")
 
         print('Plot nodes indexes equivalence:')
         for e in l:
@@ -172,9 +176,9 @@ class Apriori:
         """
         #print('Calculate the confidence of the left and the right handside of the rules')
         if left_precalculated is not None:
-            conf = self.support_count(left + right) / left_precalculated
+            conf = float(self.support_count(left + right)) / float(left_precalculated)
         else:
-            conf = self.support_count(left + right) / self.support_count(left)
+            conf = float(self.support_count(left + right)) / float(self.support_count(left))
 
         return conf
 
