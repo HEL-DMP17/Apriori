@@ -2,11 +2,9 @@
 import collections
 import itertools
 import time
-import matplotlib
-
-from graph_tool.all import *
 
 # Internal modules here
+from pmml_exporter import *
 
 """
 Add documentation about this class here
@@ -21,6 +19,7 @@ class Apriori:
         self.itemsets_by_freq = {}
         self.freq_itemsets = []
         self.arules = []
+        self.arules_id = 0
         # Run the main algorithm
         self.apriori_run()
 
@@ -40,7 +39,8 @@ class Apriori:
         # print('Lift',lift)
         if conf > self.min_conf:
             # Add into arules list if greater than some value
-            rule = {'LEFT': left, 'RIGHT': right, 'SUP': sup, 'CONF': conf, 'LIFT': lift}
+            self.arules_id += 1
+            rule = {'ID': self.arules_id, 'LEFT': left, 'RIGHT': right, 'SUP': sup, 'CONF': conf, 'LIFT': lift}
             # rule_sym = {'LEFT': right, 'RIGHT': left, 'CONF': conf_sym, 'LIFT': lift}
             self.arules.append(rule)
             # self.arules.append(rule_sym)
@@ -57,6 +57,9 @@ class Apriori:
         for dict_itemset in self.freq_itemsets:
             itemset = dict_itemset['ITEMS']
             freq = dict_itemset['FREQ']
+            if isinstance(itemset, str):
+                continue
+
             # Only need to do, one less length combinations group
             # Because previous groups are already extracted
             combs = list(itertools.combinations(itemset, len(itemset) - 1))
@@ -67,46 +70,7 @@ class Apriori:
                 self.addrule(left,right)
         # Return association rules
         self.save_rules()
-        #self.plot_arules()
         return self.arules
-
-    def plot_arules(self):
-        # Raw idea to plot association rules using graph_tool library.
-        # the library includes graphic methods like spaning tree, maxflow, etc.
-        # Source: https://graph-tool.skewed.de/static/doc/quickstart.html
-        # TODO: check if this idea could be useful for plotting a-rules. Access to a-rules.png file
-        g=Graph()
-        ug = Graph(directed=True)
-        l = []
-        r = []
-
-        for t in self.arules:
-            if str(t['LEFT']) not in l:
-                l.append(str(t['LEFT']))
-            if str(t['RIGHT']) not in r:
-                r.append(str(t['RIGHT']))
-
-        ll=len(l)
-        lr=len(r)
-        g.add_vertex(ll+lr)
-
-        for t in self.arules:
-            il=l.index(str(t['LEFT']))
-            ir=r.index(str(t['RIGHT']))
-            #print(il,ll+ir)
-            g.add_edge(g.vertex(il), g.vertex(ll+ir))
-
-        tree = min_spanning_tree(g)
-        graph_draw(g, vertex_text=g.vertex_index,
-                   vertex_font_size=18, vertex_size=1, edge_pen_width=2.5,
-                   vcmap=matplotlib.cm.gist_heat_r, edge_color=tree,
-                   output_size = (1200, 1200), output = "a-rules.png")
-
-        print('Plot nodes indexes equivalence:')
-        for e in l:
-            print(l.index(e),":",e)
-        for e in r:
-            print(r.index(e)+ll, ":", e)
 
     def _prntarule(self, left, right):
         """
@@ -243,8 +207,15 @@ class Apriori:
         fid = 0 # Unique frequent itemset id
         # All 1-itemsets
         Fk = self.uniques
+        print(Fk)
         # Find all frequent 1-itemsets
         Fk = self.freq1_itemsets(Fk)
+        # Add all f1-is to main list
+        for i in Fk:
+            fid += 1
+            t = {'ID': fid, 'FREQ': self.uniques[i[0]], 'ITEMS': i[0]}
+            self.freq_itemsets.append(t)
+
         # Until no more Frequent itemset is generated
         while len(Fk) > 0:
             k += 1
@@ -268,7 +239,7 @@ class Apriori:
                 if item[1] >= self.min_sup:
                     # Clear the items from the string format
                     set_s = [i.replace("['","").replace(",","").replace("']","").replace("'","") for i in item[0].split()]
-                    if (len(Fk)==0):
+                    if len(Fk) == 0:
                         Fk.append(set_s)
                     else:
                         Fk.insert(len(Fk), set_s)
@@ -289,6 +260,7 @@ class Apriori:
         print('Transactions:')
         for transaction in self.transactions:
             print(transaction)
+        self.save_freqis()
         return(self.freq_itemsets)
 
     def save_freqis(self, path = "../frequent_itemsets.csv"):
@@ -301,10 +273,13 @@ class Apriori:
         start_t = time.clock()
         with open(path, 'w') as f:
             f.write("ID,FREQUENCY,ITEMS\n")
-            for t in self.transactions:
+            for t in self.freq_itemsets:
                 print_str = str(t['ID']) + ',' + str(t['FREQ'])
-                for i in t['ITEMS'].keys():
-                    print_str += "," + i
+                if isinstance(t['ITEMS'], str):
+                    print_str += "," + t['ITEMS']
+                else:
+                    for i in t['ITEMS']:
+                        print_str += "," + i
                 print_str += "\n"
                 f.write(print_str)
         # Performance measurements
@@ -323,9 +298,10 @@ class Apriori:
 
         start_t = time.clock()
         with open(path, 'w') as f:
-            f.write("LEFT,RIGHT,SUP,CONF,LIFT\n")
+            f.write("ID,LEFT,RIGHT,SUP,CONF,LIFT\n")
             for t in self.arules:
-                print_str = str(t['LEFT']) + ',' + str(t['RIGHT']) + ',' + str(t['SUP']) + ',' + str(t['CONF']) + ',' + str(t['LIFT'])
+                print_str = str(t['ID']) + ',' + str(t['LEFT']) + ',' + str(t['RIGHT']) + \
+                            ',' + str(t['SUP']) + ',' + str(t['CONF']) + ',' + str(t['LIFT'])
                 print_str += "\n"
                 f.write(print_str)
         # Performance measurements
@@ -333,6 +309,21 @@ class Apriori:
         print("Save procedure took {:>10} seconds"
               .format(total_t))
         return True
+
+    def export(self, path):
+        """
+        Export rules in PMML format to visualize later on using R-packages.
+
+        :param path: path to write the PMML file
+        :return: True on on successful operation
+        """
+        if self.arules == []:
+            raise('Cannot export - arules empty')
+        if self.freq_itemsets == []:
+            raise('Cannot export - freq_itemsets empty')
+        # Exporter
+        exporter = PMML_Exporter(self.min_sup, self.min_conf, self.transaction_count, self.uniques, self.freq_itemsets, self.arules)
+        exporter.export(path)
 
     def _print_freq_is(self):
         """

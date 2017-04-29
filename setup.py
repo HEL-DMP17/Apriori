@@ -10,6 +10,7 @@ setup(
     url='https://github.com/HEL-DMP17/Apriori',
     packages=find_packages(exclude=['docs', 'tests.*', 'tests']),
     install_requires=[
+        'lxml'
         #'numpy',
         #'scipy',
     ],

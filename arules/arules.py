@@ -31,11 +31,12 @@ if __name__ == "__main__":
     if pp.parse_file(file) > 0:
         transactions = pp.get_transactions()
         uniques = pp.get_uniques()
-        # if pp.save_transactions():
-        #     print('File saved successfully')
+        if pp.save_transactions():
+            print('File saved successfully')
         # pp._print_transactions()
         # print(uniques)
         # Extract association rules using apriori
         apriori = Apriori(transactions, uniques, sup, conf)
-        apriori._print_freq_is()
+        # apriori._print_freq_is()
         apriori.extract()
+        apriori.export('../pmml_rules.xml')
