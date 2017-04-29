@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<PMML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.dmg.org/PMML-4_3" version="4.3" xsi:schemaLocation="http://www.dmg.org/PMML-4_3 http://www.dmg.org/pmml/v4-3/pmml-4-3.xsd">
+  <Header copyright="Copyright (c) 2017 eozer" description="arules association rules model">
+    <Extension extender="Rattle/PMML" name="user" value="eozer"/>
+    <Application name="Rattle/PMML" version="1.4"/>
+    <Timestamp>Timestamp: 2017-04-29 22:33:17</Timestamp>
+  </Header>
+  <DataDictionary numberOfFields="2">
+    <DataField dataType="string" name="transaction" optype="categorical"/>
+    <DataField dataType="string" name="item" optype="categorical"/>
+  </DataDictionary>
+  <AssociationModel functionName="associationRules" minimumConfidence="0.374" minimumSupport="2.0" numberOfItems="7" numberOfItemsets="16" numberOfRules="20" numberOfTransactions="10">
+    <MiningSchema>
+      <MiningField name="transaction" usageType="group"/>
+      <MiningField name="item" usageType="active"/>
+    </MiningSchema>
+    <Item id="1" value="RACE_IS_OTHERS"/>
+    <Item id="2" value="RACE_IS_WHITE"/>
+    <Item id="3" value="SCORE_IS_[44-57]"/>
+    <Item id="4" value="SCORE_IS_[57-69]"/>
+    <Item id="5" value="SCORE_IS_[69-82]"/>
+    <Item id="6" value="SEX_IS_FEMALE"/>
+    <Item id="7" value="SEX_IS_MALE"/>
+    <Itemset id="1" numberOfItems="1">
+      <ItemRef itemRef="1"/>
+    </Itemset>
+    <Itemset id="2" numberOfItems="1">
+      <ItemRef itemRef="2"/>
+    </Itemset>
+    <Itemset id="3" numberOfItems="1">
+      <ItemRef itemRef="3"/>
+    </Itemset>
+    <Itemset id="4" numberOfItems="1">
+      <ItemRef itemRef="4"/>
+    </Itemset>
+    <Itemset id="5" numberOfItems="1">
+      <ItemRef itemRef="6"/>
+    </Itemset>
+    <Itemset id="6" numberOfItems="1">
+      <ItemRef itemRef="7"/>
+    </Itemset>
+    <Itemset id="7" numberOfItems="2">
+      <ItemRef itemRef="2"/>
+      <ItemRef itemRef="7"/>
+    </Itemset>
+    <Itemset id="8" numberOfItems="2">
+      <ItemRef itemRef="4"/>
+      <ItemRef itemRef="7"/>
+    </Itemset>
+    <Itemset id="9" numberOfItems="2">
+      <ItemRef itemRef="2"/>
+      <ItemRef itemRef="4"/>
+    </Itemset>
+    <Itemset id="10" numberOfItems="2">
+      <ItemRef itemRef="2"/>
+      <ItemRef itemRef="3"/>
+    </Itemset>
+    <Itemset id="11" numberOfItems="2">
+      <ItemRef itemRef="3"/>
+      <ItemRef itemRef="7"/>
+    </Itemset>
+    <Itemset id="12" numberOfItems="2">
+      <ItemRef itemRef="1"/>
+      <ItemRef itemRef="7"/>
+    </Itemset>
+    <Itemset id="13" numberOfItems="2">
+      <ItemRef itemRef="3"/>
+      <ItemRef itemRef="6"/>
+    </Itemset>
+    <Itemset id="14" numberOfItems="2">
+      <ItemRef itemRef="2"/>
+      <ItemRef itemRef="6"/>
+    </Itemset>
+    <Itemset id="15" numberOfItems="3">
+      <ItemRef itemRef="2"/>
+      <ItemRef itemRef="3"/>
+      <ItemRef itemRef="6"/>
+    </Itemset>
+    <Itemset id="16" numberOfItems="3">
+      <ItemRef itemRef="2"/>
+      <ItemRef itemRef="4"/>
+      <ItemRef itemRef="7"/>
+    </Itemset>
+    <AssociationRule antecedent="2" confidence="0.625" consequent="6" lift="0.8928571428571429" support="0.5"/>
+    <AssociationRule antecedent="6" confidence="0.7142857142857143" consequent="2" lift="0.8928571428571428" support="0.5"/>
+    <AssociationRule antecedent="4" confidence="0.8" consequent="6" lift="1.142857142857143" support="0.4"/>
+    <AssociationRule antecedent="6" confidence="0.5714285714285714" consequent="4" lift="1.1428571428571428" support="0.4"/>
+    <AssociationRule antecedent="2" confidence="0.5" consequent="4" lift="1.0" support="0.4"/>
+    <AssociationRule antecedent="4" confidence="0.8" consequent="2" lift="1.0" support="0.4"/>
+    <AssociationRule antecedent="2" confidence="0.375" consequent="3" lift="0.9375" support="0.3"/>
+    <AssociationRule antecedent="3" confidence="0.75" consequent="2" lift="0.9375" support="0.3"/>
+    <AssociationRule antecedent="3" confidence="0.5" consequent="6" lift="0.7142857142857143" support="0.2"/>
+    <AssociationRule antecedent="1" confidence="1.0" consequent="6" lift="1.4285714285714286" support="0.2"/>
+    <AssociationRule antecedent="3" confidence="0.5" consequent="5" lift="1.6666666666666667" support="0.2"/>
+    <AssociationRule antecedent="5" confidence="0.6666666666666666" consequent="3" lift="1.6666666666666665" support="0.2"/>
+    <AssociationRule antecedent="2" confidence="0.375" consequent="5" lift="1.25" support="0.3"/>
+    <AssociationRule antecedent="5" confidence="1.0" consequent="2" lift="1.25" support="0.3"/>
+    <AssociationRule antecedent="10" confidence="0.6666666666666666" consequent="5" lift="2.2222222222222223" support="0.2"/>
+    <AssociationRule antecedent="14" confidence="0.6666666666666666" consequent="3" lift="1.6666666666666665" support="0.2"/>
+    <AssociationRule antecedent="13" confidence="1.0" consequent="2" lift="1.25" support="0.2"/>
+    <AssociationRule antecedent="9" confidence="0.75" consequent="6" lift="1.0714285714285714" support="0.3"/>
+    <AssociationRule antecedent="7" confidence="0.6" consequent="4" lift="1.2" support="0.3"/>
+    <AssociationRule antecedent="8" confidence="0.75" consequent="2" lift="0.9375" support="0.3"/>
+  </AssociationModel>
+</PMML>
