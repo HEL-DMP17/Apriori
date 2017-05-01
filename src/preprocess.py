@@ -57,10 +57,27 @@ class PreProcessor:
                 race = self.get_field(chars, mp.race)
                 score = self.get_field(chars, mp.score)
                 lang_native=self.get_field(chars,mp.lang_native)
-                fam_comp=self.get_field(chars,mp.family_comp)
+                fam_comp=self.get_field(chars,mp.fam_comp)
+                par_edu=self.get_field(chars,mp.par_edu)
+                income=self.get_field(chars,mp.income)
+                s_expect=self.get_field(chars,mp.s_expect)
+                control=self.get_field(chars,mp.control)
+                sc_loc=self.get_field(chars,mp.sc_loc)
+                fight=self.get_field(chars,mp.fight)
+                late = self.get_field(chars, mp.late)
+                homework = self.get_field(chars, mp.homework)
+                sh_accomp = self.get_field(chars, mp.sh_accomp)
+                sh_poorp = self.get_field(chars, mp.sh_poorp)
+                good_grec = self.get_field(chars, mp.good_grec)
+                likes_s = self.get_field(chars, mp.likes_s)
+                library = self.get_field(chars, mp.library)
 
                 # Add this into transaction. Put all the fields into the list
-                fields = [sex, race, score,lang_native,fam_comp]
+                fields = [sex, race, score, lang_native, fam_comp,
+                          par_edu,income, s_expect, control, sc_loc,
+                          fight, late, homework, sh_accomp, sh_poorp,
+                          good_grec, likes_s, library]
+
                 self.add_transaction(fields)
         # Performance measurements
         total_t = str(format(time.clock() - start_t, '.4f'))
@@ -261,12 +278,103 @@ class PreProcessor:
             self.score = {'COL': 'SCORE', 'TYPE': 'CONTINIOUS', 'STR': 106, 'END': 111,
                           'MIN': 20.91, 'MAX': 81.04, 'INTERVAL': 5}
 
+            # Whether English is student's native language-composite
             self.lang_native = {'COL': 'ENG_LANG_NATIVE', 'TYPE': 'BINARY', 'STR': 28, 'END': 29,
                         'OTHERS': None,
                         'VALS': {0: 'NO', 1: 'YES'}}
 
-            self.family_comp = {'COL': 'FAM', 'TYPE': 'CATEGORICAL', 'STR': 42, 'END': 43,
+            # Family composition
+            self.fam_comp = {'COL': 'FAM', 'TYPE': 'CATEGORICAL', 'STR': 42, 'END': 43,
                          'OTHERS':{4: 'GG', 5: 'M', 6: 'F', 7: 'FEG', 8: 'MAG',9: 'HALFTIME'},
                          'VALS': {1: 'MF', 2: 'MG', 3: 'FG',
                                   4: 'GG', 5: 'M', 6: 'F',
                                   7: 'FEG', 8: 'MAG',9: 'HALFTIME'}}
+
+            # Parents' highest level of education
+            self.par_edu = {'COL': 'PAR_EDU', 'TYPE': 'CATEGORICAL', 'STR': 44, 'END': 45,
+                                'OTHERS': None,
+                                'VALS': {1: 'UHS', 2: 'HS', 3: 'US',
+                                         4: 'S', 5: 'UC', 6: 'C',
+                                         7: 'M', 8: 'PHD'}}
+
+            # Total family income from all sources 2001-composite
+            self.income = {'COL': 'INCOME', 'TYPE': 'CATEGORICAL', 'STR': 54, 'END': 55,
+                            'OTHERS': {1: 'NONE', 2: '0-1K', 3: '1-5K'},
+                            'VALS': {1: 'NONE', 2: '0-1K', 3: '1-5K',
+                                     4: '5-10K', 5: '10-15K', 6: '15-20K',
+                                     7: '20-25K', 8: '25-35K', 9: '35-50K',
+                                     10: '50-75K', 11: '75-100K',12: '100-200K',
+                                     13: '200K-more'}}
+
+            # How far in school student thinks will get-composite
+            self.s_expect = {'COL': 'S_EXPEC', 'TYPE': 'CATEGORICAL', 'STR': 72, 'END': 73,
+                                'OTHERS': None,
+                                'VALS': {-1:'UK',
+                                         1: 'UHS', 2: 'HS', 3: 'S',
+                                         4: 'UC', 5: 'C', 6: 'M',
+                                         7: 'PHD'}}
+
+            # School control
+            self.control = {'COL': 'SC_CTRL', 'TYPE': 'CATEGORICAL', 'STR': 253, 'END': 253,
+                             'OTHERS': None,
+                             'VALS': {1: 'PUB', 2: 'CAT', 3: 'PRI'}}
+
+            # School urbanicity
+            self.sc_loc = {'COL': 'SC_LOC', 'TYPE': 'CATEGORICAL', 'STR': 254, 'END': 254,
+                          'OTHERS': None,
+                          'VALS': {1: 'UR', 2: 'SUB', 3: 'RU'}}
+
+            # Got into a physical fight at school
+            self.fight = {'COL': 'FIGHT', 'TYPE': 'CATEGORICAL', 'STR': 336, 'END': 337,
+                             'OTHERS': {-9: 'MISSING', -7: 'NOT_INTERV', -6: 'MUL_RESP'},
+                             'VALS': {-9: 'MISSING', -7: 'NOT_INTERV', -6: 'MUL_RESP',
+                                      1: 'NEVER', 2: '1-2', 3: '2-MORE'}}
+
+            # Got into a physical fight at school
+            self.late = {'COL': 'LATE', 'TYPE': 'CATEGORICAL', 'STR': 358, 'END': 359,
+                          'OTHERS': {-9: 'MISSING', -7: 'NOT_INTERV', -6: 'MUL_RESP'},
+                          'VALS': {-9: 'MISSING', -7: 'NOT_INTERV', -6: 'MUL_RESP',
+                                   1: 'NEVER', 2: '1-2', 3: '3-6',
+                                   4: '7-9', 5: '10-more'}}
+
+            # How often student completes homework
+            self.homework = {'COL': 'HOMEWORK', 'TYPE': 'CATEGORICAL', 'STR': 1610, 'END': 1611,
+                         'OTHERS': {-9: 'MISSING', -6: 'MUL_RESP', -4: 'NO_ASW',
+                                    -3: 'SKIP_ANS',-1 : 'DONT_K'},
+                         'VALS': {-9: 'MISSING', -6: 'MUL_RESP', -4: 'NO_ASW',
+                                  -3: 'SKIP_ANS',-1 : 'DONT_K',
+                                  1: 'NEVER', 2: 'RARELY', 3: 'SOMET',
+                                  4: 'MOSTT', 5: 'ALLT'}}
+
+            # Spoke to parents about accomplishments (English)
+            self.sh_accomp = {'COL': 'SH_ACCOMP', 'TYPE': 'CATEGORICAL', 'STR': 1590, 'END': 1591,
+                         'OTHERS': {-9: 'MISSING', -4: 'NO_ASW', -3: 'SKIP_ANS'},
+                         'VALS': {-9: 'MISSING', -4: 'NO_ASW', -3: 'SKIP_ANS',
+                                  0: 'NO', 1: 'YES'}}
+
+            #Spoke to parents about poor performance (English)
+            self.sh_poorp = {'COL': 'SH_POORP', 'TYPE': 'CATEGORICAL', 'STR': 1582, 'END': 1583,
+                              'OTHERS': {-9: 'MISSING', -6: 'MUL_RESP', -4: 'NO_ASW',
+                                         -3: 'SKIP_ANS'},
+                              'VALS': {-9: 'MISSING', -6: 'MUL_RESP', -4: 'NO_ASW',
+                                       -3: 'SKIP_ANS',
+                                       0: 'NO', 1: 'YES'}}
+
+            # Recognized for good grades
+            self.good_grec = {'COL': 'RECOG', 'TYPE': 'CATEGORICAL', 'STR': 350, 'END': 351,
+                         'OTHERS': {-9: 'MISSING', -7: 'NOT_INTERV', -6: 'MUL_RESP'},
+                         'VALS': {-9: 'MISSING', -7: 'NOT_INTERV', -6: 'MUL_RESP',
+                                  0: 'NO', 1: 'YES'}}
+
+            # How much likes school
+            self.likes_s = {'COL': 'LIKES_S', 'TYPE': 'CATEGORICAL', 'STR': 428, 'END': 429,
+                         'OTHERS': {-9: 'MISSING', -6: 'MUL_RESP',-1 : 'DONT_K'},
+                         'VALS': {-9: 'MISSING', -6: 'MUL_RESP', -1 : 'DONT_K',
+                                  1: 'NO', 2: 'SOME', 3: 'YES'}}
+
+            # Use of school library for assignments
+            self.library = {'COL': 'LIBRARY', 'TYPE': 'CATEGORICAL', 'STR': 708, 'END': 709,
+                            'OTHERS': {-9: 'MISSING', -7: 'NOT_INTERV', -6: 'MUL_RESP',
+                                       -3: 'SKIP_ANS'},
+                            'VALS': {-9: 'MISSING', -6: 'MUL_RESP', -1: 'DONT_K',
+                                     1: 'NEVER', 2: 'RARELY', 3: 'SOMET', 4: 'OFTEN'}}
