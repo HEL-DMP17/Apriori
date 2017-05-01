@@ -56,8 +56,11 @@ class PreProcessor:
                 sex = self.get_field(chars, mp.sex)
                 race = self.get_field(chars, mp.race)
                 score = self.get_field(chars, mp.score)
+                lang_native=self.get_field(chars,mp.lang_native)
+                fam_comp=self.get_field(chars,mp.family_comp)
+
                 # Add this into transaction. Put all the fields into the list
-                fields = [sex, race, score]
+                fields = [sex, race, score,lang_native,fam_comp]
                 self.add_transaction(fields)
         # Performance measurements
         total_t = str(format(time.clock() - start_t, '.4f'))
@@ -257,3 +260,13 @@ class PreProcessor:
             # SCORE_IS-20_60 , 35.12
             self.score = {'COL': 'SCORE', 'TYPE': 'CONTINIOUS', 'STR': 106, 'END': 111,
                           'MIN': 20.91, 'MAX': 81.04, 'INTERVAL': 5}
+
+            self.lang_native = {'COL': 'ENG_LANG_NATIVE', 'TYPE': 'BINARY', 'STR': 28, 'END': 29,
+                        'OTHERS': None,
+                        'VALS': {0: 'NO', 1: 'YES'}}
+
+            self.family_comp = {'COL': 'FAM', 'TYPE': 'CATEGORICAL', 'STR': 42, 'END': 43,
+                         'OTHERS':{4: 'GG', 5: 'M', 6: 'F', 7: 'FEG', 8: 'MAG',9: 'HALFTIME'},
+                         'VALS': {1: 'MF', 2: 'MG', 3: 'FG',
+                                  4: 'GG', 5: 'M', 6: 'F',
+                                  7: 'FEG', 8: 'MAG',9: 'HALFTIME'}}
