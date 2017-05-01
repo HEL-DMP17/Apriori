@@ -71,7 +71,7 @@ class Apriori:
                 right = self.diffelems(left, itemset)
                 self.addrule(left,right)
                 # Check also the symmetric rule
-                # self.addrule(right, left)
+                self.addrule(right, left)
         # Return association rules
         self.save_rules()
         return self.arules

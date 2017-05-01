@@ -8,7 +8,10 @@ library("arulesViz")
 library("visNetwork")
 library("igraph")
 
-rules <- read.PMML("../pmml_rules.xml")
+# Change this, because this is .... R
+setwd("C:/Users/eozer/Documents/GitHub/Apriori")
+
+rules <- read.PMML("pmml_rules.xml")
 
 ig <- plot( rules, method="graph", control=list(type="items") )
 
@@ -26,12 +29,13 @@ visNetwork(
     nodes = nodez
     , edges = ig_df$edges,  main = "ARule Network", width = "100%"
 ) %>% 
+    visIgraphLayout() %>%
     visEdges(shadow = FALSE,
              arrows =list(to = list(enabled = TRUE, scaleFactor = 2)),
              color = list(color = "lightblue", highlight = "red")) %>%
     visOptions(highlightNearest = list(enabled = T, hover = T),
-               nodesIdSelection = TRUE)
-
+               nodesIdSelection = TRUE) %>% 
+    visInteraction(navigationButtons = TRUE)
 # Interactive table
 inspectDT(rules)
 

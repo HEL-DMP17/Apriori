@@ -6,8 +6,8 @@ from apriori import *
 
 if __name__ == "__main__":
     # Set Defaults
-    # file = "../data/samples.txt"
-    file = "../data/raw_data.txt"
+    file = "../data/samples.txt"
+    # file = "../data/raw_data.txt"
     sup = 2.0
     conf = 0.374
     # Read arguments
