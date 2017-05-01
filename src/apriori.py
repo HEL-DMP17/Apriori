@@ -4,7 +4,7 @@ import itertools
 import time
 
 # Internal modules here
-from pmml_exporter import *
+from src.pmml_exporter import *
 
 class Apriori:
     """
@@ -261,7 +261,7 @@ class Apriori:
         self.save_freqis()
         return(self.freq_itemsets)
 
-    def save_freqis(self, path = "../frequent_itemsets.csv"):
+    def save_freqis(self, path = "frequent_itemsets.csv"):
         """
         Save the frequent itemsets into a file
 
@@ -287,7 +287,7 @@ class Apriori:
               .format(total_t))
         return True
 
-    def save_rules(self, path="../arules.csv"):
+    def save_rules(self, path="arules.csv"):
         """
         Saves the association rules into a file
 

@@ -1,7 +1,7 @@
 ##########################################
 # Import the path to see the other files
 import sys
-sys.path.append('../arules')
+sys.path.append('../src')
 # Import core unittest
 import unittest
 ##########################################

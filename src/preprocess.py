@@ -4,7 +4,7 @@ import math
 import time
 
 # Internal modules
-from utils import *
+from src.utils import *
 
 class PreProcessor:
     """
@@ -188,7 +188,7 @@ class PreProcessor:
         else:
             raise ValueError('This key is not inside our mapper VALS - check binarize method in preprocess.py')
 
-    def save_transactions(self, path = "../transactions.csv"):
+    def save_transactions(self, path = "transactions.csv"):
         """
         Save the preprocessed transactions into a file
         :param path: Path to be saved

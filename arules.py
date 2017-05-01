@@ -1,13 +1,13 @@
 # This is the stub for our main runner python file
 
 import argparse
-from preprocess import *
-from apriori import *
+from src.preprocess import *
+from src.apriori import *
 
 if __name__ == "__main__":
     # Set Defaults
-    file = "../data/samples.txt"
-    # file = "../data/raw_data.txt"
+    file = "data/samples.txt"
+    # file = "data/raw_data.txt"
     sup = 2.0
     conf = 0.374
     # Read arguments
@@ -40,4 +40,4 @@ if __name__ == "__main__":
         apriori = Apriori(transactions, uniques, sup, conf)
         # apriori._print_freq_is()
         apriori.extract()
-        apriori.export('../pmml_rules.xml')
+        apriori.export('pmml_rules.xml')
