@@ -6,10 +6,10 @@ import time
 # Internal modules here
 from pmml_exporter import *
 
-"""
-Add documentation about this class here
-"""
 class Apriori:
+    """
+    Apriori algorithm to find frequent itemset and extract the association rules
+    """
     def __init__(self, transactions, uniques, min_sup=2.0, min_conf=1.5):
         self.transactions = transactions
         self.transaction_count = transactions[-1]['ID'] # get the ID of the last element
@@ -23,32 +23,35 @@ class Apriori:
         # Run the main algorithm
         self.apriori_run()
 
-        #Test for supportcount
-        #self.support_count(['SCORE_IS_[44-57]', 'SEX_IS_FEMALE'])
-
     def addrule(self,left,right):
+        """
+        Adds the rule if it is greater than min conf
+        :param left: Left hand side itemset (list)
+        :param right: Right hand side itemset (list)
+        :return:
+        """
         lr = left + right
-        # Symmetric rules must be checked too
-        #self._prntarule(left,right)
         # Calculate measures
         sup = self.support(lr)
-        #print('Support',sup)
         conf = self.confidence(left, right)
-        #print('Confidence',conf)
         lift = self.lift(left, right)  # this is a symmetric measure no need to calculate twice
-        # print('Lift',lift)
+        # Check the min_conf value
+        # TODO: could be extended to use both lift and conf
         if conf > self.min_conf:
             # Add into arules list if greater than some value
             self.arules_id += 1
             rule = {'ID': self.arules_id, 'LEFT': left, 'RIGHT': right, 'SUP': sup, 'CONF': conf, 'LIFT': lift}
-            # rule_sym = {'LEFT': right, 'RIGHT': left, 'CONF': conf_sym, 'LIFT': lift}
             self.arules.append(rule)
-            # self.arules.append(rule_sym)
+            # LOG the rule
             self._prntarule(left, right)
             print('SUP', sup, 'CONF', conf, 'LIFT', lift)
 
 
     def extract(self):
+        """
+        Association rule extraction method
+        :return:
+        """
         # Check frequent itemset if contains valuable association rule
         # Append the rules greater than some measurements e.g. lift/confidence
         print('Frequent itemsets:', self.freq_itemsets)
@@ -57,17 +60,18 @@ class Apriori:
         for dict_itemset in self.freq_itemsets:
             itemset = dict_itemset['ITEMS']
             freq = dict_itemset['FREQ']
+            # Fix for 1-freq itemset
             if isinstance(itemset, str):
                 continue
-
             # Only need to do, one less length combinations group
             # Because previous groups are already extracted
             combs = list(itertools.combinations(itemset, len(itemset) - 1))
             for c in combs:
                 left = list(c)
                 right = self.diffelems(left, itemset)
-                #self._prntarule(left, right)
                 self.addrule(left,right)
+                # Check also the symmetric rule
+                # self.addrule(right, left)
         # Return association rules
         self.save_rules()
         return self.arules
@@ -181,24 +185,23 @@ class Apriori:
 
     def apriori_gen(self, Fk, k):
         """
-            Used to generate size k candidates based on the frequent itemsets Fk
-            :param Fk list of k-1 itemsets, k:number of items that should have the new itemsets
-            :return: new_candidates: list of size k-itemsets,
-            """
-        #print('-------Generating candidate itemsets')
+        Used to generate size k candidates based on the frequent itemsets Fk
+
+        :param Fk list of k-1 itemsets, k:number of items that should have the new itemsets
+        :return: new_candidates: list of size k-itemsets,
+        """
         new_candidates=[]
         for i in range(len(Fk)-1):
             for j in range(i+1,len(Fk)):
                 if  Fk[i][0:len(Fk[i])-k]==Fk[j][0:len(Fk[j])-k]:
                     Fk1=sorted(list(set(Fk[i]).union(Fk[j])))
                     new_candidates.append(Fk1)
-        #print('-------out of Generating candidate itemsets')
         return(new_candidates)
 
     def apriori_run(self):
         """
         Main frequent itemset generation algorithm - Apriori.
-        Returns all frequent itemsets.
+
         :return: Frequent itemsets (dict)
         """
         print("Apriori algorithm initiated")
@@ -247,15 +250,10 @@ class Apriori:
                     fid += 1
                     t = {'ID': fid, 'FREQ': item[1], 'ITEMS': Fk[-1]}
                     self.freq_itemsets.append(t)
-            # Sorting list to apply Fk-1 next candidates generation
-            #Fk.sort()
-            # print('Frequent itemsets size',k,":",len(Fk))
-            # for i in Fk:
-            #     print(i)
         # Performance measurements
         total_t = str(format(time.clock() - start_t, '.4f'))
         print("Apriori took {:>10} seconds"
-                  .format(total_t))
+              .format(total_t))
         # Return frequent itemsets
         print('Transactions:')
         for transaction in self.transactions:
@@ -266,6 +264,7 @@ class Apriori:
     def save_freqis(self, path = "../frequent_itemsets.csv"):
         """
         Save the frequent itemsets into a file
+
         :param path: Path to be saved
         :return: Returns true on successful save
         """
@@ -291,6 +290,7 @@ class Apriori:
     def save_rules(self, path="../arules.csv"):
         """
         Saves the association rules into a file
+
         :param path: Path to be saved
         :return: Returns true on successful action
         """

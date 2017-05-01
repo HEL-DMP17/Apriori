@@ -1,15 +1,14 @@
-install.packages("arules")
-install.packages("arulesViz")
-install.packages("visNetwork")
-install.packages("igraph")
+# install.packages("arules")
+# install.packages("arulesViz")
+# install.packages("visNetwork")
+# install.packages("igraph")
+
 library("arules")
 library("arulesViz")
 library("visNetwork")
 library("igraph")
 
-# TODO: get it relative path
-setwd("C:/Users/eozer/Documents/GitHub/Apriori")
-rules <- read.PMML("pmml_rules.xml")
+rules <- read.PMML("../pmml_rules.xml")
 
 ig <- plot( rules, method="graph", control=list(type="items") )
 
@@ -30,10 +29,12 @@ visNetwork(
     visEdges(shadow = FALSE,
              arrows =list(to = list(enabled = TRUE, scaleFactor = 2)),
              color = list(color = "lightblue", highlight = "red")) %>%
-    visOptions( highlightNearest = T, nodesIdSelection = TRUE)
+    visOptions(highlightNearest = list(enabled = T, hover = T),
+               nodesIdSelection = TRUE)
 
 # Interactive table
 inspectDT(rules)
 
 # Interactive scatter plot
 plotly_arules(rules)
+

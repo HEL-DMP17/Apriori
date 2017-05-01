@@ -6,49 +6,45 @@ import time
 # Internal modules
 from utils import *
 
-"""
-This will be PREPROCESSOR class, TODO: add some docs
-"""
-
-
 class PreProcessor:
+    """
+    The preprocessor class that handles binarization and discretization of dataset
+    """
     def __init__(self):
         self.transactions = []
         self.unique = collections.OrderedDict()
         self.trans_count = 0
         self.mapper = PreProcessor.Mapper()
-        # Parse the file
-        # self.parse_file(file)
-        # print(self.transactions)
-        # self._print_transactions()
-        # print(self.unique)
 
     def get_transactions(self):
         """
         Getter method for transactions list of OrderedDict
-        :return: Transactions list
+
+        :return: Transactions list (list(OrderedDict))
         """
         return self.transactions
 
     def get_uniques(self):
         """
         Getter method for unique itemsets (dictionary)
-        :return: Counts of unique itemsets
+
+        :return: Unique itemsets (dict), key: items, value: counts
         """
         return self.unique
 
     def get_transaction_count(self):
         """
         Getter method for transaction count after parsing the file
+
         :return: Transaction count (int)
         """
         return self.trans_count
 
     def parse_file(self, file):
-        """
-        File reader for student-level dataset
-        :param file: Filepath for dataset
-        :return:
+        """ The main function to parse the file and run the preprocesser methods
+
+        :param file: Filepath of the data
+        :return: Returns number of the transaction parsed (int)
         """
         print("Preprocess begin to parse the file")
         start_t = time.clock()
@@ -66,11 +62,17 @@ class PreProcessor:
         # Performance measurements
         total_t = str(format(time.clock() - start_t, '.4f'))
         print("Preprocessing took {:>10} seconds"
-                  .format(total_t))
+              .format(total_t))
         # Return number of transactions added
         return self.trans_count
 
     def get_field(self, line, mapper):
+        """
+        Selects the appropriate preprocessing method according to line and mapper structure
+        :param line: New line of data (str)
+        :param mapper: Corresponding mapper structure of the field
+        :return: Preprocessed field (str)
+        """
         value = line[mapper['STR'] - 1: mapper['END']]
         # Check the type and execute either discretize/binarize etc.
         if mapper['TYPE'] == 'BINARY':
@@ -81,6 +83,12 @@ class PreProcessor:
             return self.discretize(mapper, float(value))
 
     def add_transaction(self, fields):
+        """
+        Adds the preprocessed fields into the transaction list
+
+        :param fields: Preprocessed fields (list)
+        :return:
+        """
         self.trans_count += 1
         items = collections.OrderedDict()
         # Add the fields here, True is only used to have
@@ -94,9 +102,10 @@ class PreProcessor:
 
     def count_unique(self, fields):
         """
-        Used to increment the unique fields
-        :param fields: List of fields(str). sex, gender, score ..
-        :return: Increments self.unique dictionary
+        Updates the count of unique fields
+
+        :param fields: List of fields
+        :return:
         """
         for f in fields:
             if f not in self.unique:
@@ -142,7 +151,7 @@ class PreProcessor:
         Binarize the attribute data using mapper
         :param col_data: Categorical data assumed to be between -9 and 25
         :param mapper: Corresponding mapper of this field
-        :return: Binarized field - str
+        :return: Binarized field (str)
         """
         if mapper is None:
             print("Give an appropriate mapper")
@@ -211,16 +220,21 @@ class PreProcessor:
             print_str += "\n"
         print(print_str)
 
-    # Added to construct transaction item names
-    # There are some attiributes having 'MISSING_VALUE' types
-    # So we cannot be sure if we only add the attr type
-    # Better to combine with column name as well
     def _is_name(self, col, attr):
+        """
+        Used to construct the itemset name with combination of column and attiribute
+        :param col: Column name of the data (str)
+        :param attr: Attribute name of the data (str)
+        :return: Itemset name (str)
+        """
         return col.upper() + "_IS_" + attr.upper()
 
     # Until getting nice representation using files(possibly JSON) use this structure
     # later we can create the file structure and parser for that.
     class Mapper:
+        """
+        Used to map the fields
+        """
         def __init__(self):
             # Some fields can change
             self.sex = {'COL': 'SEX', 'TYPE': 'BINARY', 'STR': 24, 'END': 25,
