@@ -1,0 +1,53 @@
+.. Apriori documentation master file, created by
+   sphinx-quickstart on Mon May  1 21:58:48 2017.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to Apriori's documentation!
+===================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+Summary
+=======
+
+Write some summary about project here
+
+Dataset
+=======
+
+Write something about dataset
+
+Installing and running the program
+==================
+You can install and run the program from scratch as follows
+::
+	git clone https://github.com/HEL-DMP17/Apriori.git
+	cd Apriori
+	pip install -r requirements.txt
+	python arules.py
+
+
+Source code layout
+==================
+
+(All the files are in the directory ``src`` of our repository.)
+
+* ``preprocessor.py`` - Provides several methods and mapper class to preprocess the dataset
+* ``apriori.py`` - Frequent itemset generation and association rules extraction in this file
+* ``ppml_exporter.py`` - PMML file format exporter used to visualize the result in R
+* ``utils.py`` - Utility functions are here
+
+Source code documentation
+==================
+
+* :ref:`modindex`
+
+Results
+========
+
+*  Interactive association rules shown in a table `inspectDT <https://rawgit.com/HEL-DMP17/Apriori/master/analysis/inspectDT.html>`_.
+*  Visual network of top 50 rules `visNetwork <https://rawgit.com/HEL-DMP17/Apriori/master/analysis/visNetwork.html>`_.
+*  Scatter plot of all association rules `scatterPlotly <https://rawgit.com/HEL-DMP17/Apriori/master/analysis/scatterPlotly.html>`_.

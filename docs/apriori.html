@@ -1,0 +1,338 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>apriori module &#8212; Apriori 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-apriori">
+<span id="apriori-module"></span><h1>apriori module<a class="headerlink" href="#module-apriori" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="apriori.Apriori">
+<em class="property">class </em><code class="descclassname">apriori.</code><code class="descname">Apriori</code><span class="sig-paren">(</span><em>transactions</em>, <em>uniques</em>, <em>min_sup=2.0</em>, <em>min_conf=1.5</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Apriori algorithm to find frequent itemset and extract the association rules</p>
+<dl class="method">
+<dt id="apriori.Apriori.addrule">
+<code class="descname">addrule</code><span class="sig-paren">(</span><em>left</em>, <em>right</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori.addrule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori.addrule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the rule if it is greater than min conf</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>left</strong> &#8211; Left hand side itemset (list)</li>
+<li><strong>right</strong> &#8211; Right hand side itemset (list)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apriori.Apriori.apriori_gen">
+<code class="descname">apriori_gen</code><span class="sig-paren">(</span><em>Fk</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori.apriori_gen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori.apriori_gen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to generate size k candidates based on the frequent itemsets Fk</p>
+<p>:param Fk list of k-1 itemsets, k:number of items that should have the new itemsets
+:return: new_candidates: list of size k-itemsets,</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="apriori.Apriori.apriori_run">
+<code class="descname">apriori_run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori.apriori_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori.apriori_run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main frequent itemset generation algorithm - Apriori.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Frequent itemsets (dict)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apriori.Apriori.confidence">
+<code class="descname">confidence</code><span class="sig-paren">(</span><em>left</em>, <em>right</em>, <em>left_precalculated=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori.confidence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori.confidence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the confidence of the rule</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>left</strong> &#8211; left handside of the rule (list)</li>
+<li><strong>right</strong> &#8211; right handside of the rule (list)</li>
+<li><strong>left_precalculated</strong> &#8211; Existing suppport count value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Confidence value (float)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apriori.Apriori.diffelems">
+<code class="descname">diffelems</code><span class="sig-paren">(</span><em>list1</em>, <em>list2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori.diffelems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori.diffelems" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Extracts the difference elements in lists, symmetrically.</dt>
+<dd><dl class="first last docutils">
+<dt>For example:</dt>
+<dd>list1 = [&#8216;a&#8217;,&#8217;b&#8217;,&#8217;c&#8217;], list2 = [&#8216;b&#8217;,&#8217;c&#8217;]
+diffelems(list1, list2)
+# regardless of order it will return same result
+returns -&gt;  [&#8216;a&#8217;]</dd>
+</dl>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>list1</strong> &#8211; First list to be compared</li>
+<li><strong>list2</strong> &#8211; Second list to be compared</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The difference elements of first and second lists</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apriori.Apriori.export">
+<code class="descname">export</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori.export"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori.export" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export rules in PMML format to visualize later on using R-packages.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; path to write the PMML file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True on on successful operation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apriori.Apriori.extract">
+<code class="descname">extract</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori.extract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori.extract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Association rule extraction method</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apriori.Apriori.freq1_itemsets">
+<code class="descname">freq1_itemsets</code><span class="sig-paren">(</span><em>f1itemsets</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori.freq1_itemsets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori.freq1_itemsets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts the 1 length frequent itemsets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f1itemsets</strong> &#8211; 1-length frequent itemsets (dict)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">1-length frequent itemsets (list) greater that self.min_sup</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apriori.Apriori.lift">
+<code class="descname">lift</code><span class="sig-paren">(</span><em>left</em>, <em>right</em>, <em>right_precalculated=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori.lift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori.lift" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the lift of the rule</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>left</strong> &#8211; left handside of the rule (list)</li>
+<li><strong>right</strong> &#8211; right handside of the rule (list)</li>
+<li><strong>right_precalculated</strong> &#8211; Existing suppport count value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Confidence value (float)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apriori.Apriori.save_freqis">
+<code class="descname">save_freqis</code><span class="sig-paren">(</span><em>path='frequent_itemsets.csv'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori.save_freqis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori.save_freqis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the frequent itemsets into a file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; Path to be saved</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns true on successful save</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apriori.Apriori.save_rules">
+<code class="descname">save_rules</code><span class="sig-paren">(</span><em>path='arules.csv'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori.save_rules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori.save_rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the association rules into a file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; Path to be saved</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns true on successful action</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apriori.Apriori.support">
+<code class="descname">support</code><span class="sig-paren">(</span><em>itemset</em>, <em>itemset_precalculated=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori.support"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori.support" title="Permalink to this definition">¶</a></dt>
+<dd><p>Counts support</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>itemset</strong> &#8211; itemset (list)</li>
+<li><strong>itemset_precalculated</strong> &#8211; Existing suppport count value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">support of the itemset (float)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="apriori.Apriori.support_count">
+<code class="descname">support_count</code><span class="sig-paren">(</span><em>itemset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/apriori.html#Apriori.support_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#apriori.Apriori.support_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the support count of the itemset</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>itemset</strong> &#8211; itemset to be counted (list)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">support count of the itemset (int)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/apriori.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Ege Can Ozer, Agustin Zuniga.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/apriori.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

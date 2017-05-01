@@ -1,0 +1,438 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>apriori &#8212; Apriori 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for apriori</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Global modules here</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># Internal modules here</span>
+<span class="kn">from</span> <span class="nn">pmml_exporter</span> <span class="k">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="Apriori"><a class="viewcode-back" href="../apriori.html#apriori.Apriori">[docs]</a><span class="k">class</span> <span class="nc">Apriori</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apriori algorithm to find frequent itemset and extract the association rules</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transactions</span><span class="p">,</span> <span class="n">uniques</span><span class="p">,</span> <span class="n">min_sup</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">min_conf</span><span class="o">=</span><span class="mf">1.5</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span> <span class="o">=</span> <span class="n">transactions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transaction_count</span> <span class="o">=</span> <span class="n">transactions</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;ID&#39;</span><span class="p">]</span> <span class="c1"># get the ID of the last element</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uniques</span> <span class="o">=</span> <span class="n">uniques</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_sup</span> <span class="o">=</span> <span class="n">min_sup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_conf</span> <span class="o">=</span> <span class="n">min_conf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">itemsets_by_freq</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">freq_itemsets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">arules</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">arules_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># Run the main algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apriori_run</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Apriori.addrule"><a class="viewcode-back" href="../apriori.html#apriori.Apriori.addrule">[docs]</a>    <span class="k">def</span> <span class="nf">addrule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds the rule if it is greater than min conf</span>
+
+<span class="sd">        :param left: Left hand side itemset (list)</span>
+<span class="sd">        :param right: Right hand side itemset (list)</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lr</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="n">right</span>
+        <span class="c1"># Calculate measures</span>
+        <span class="n">sup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">support</span><span class="p">(</span><span class="n">lr</span><span class="p">)</span>
+        <span class="n">conf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+        <span class="n">lift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lift</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>  <span class="c1"># this is a symmetric measure no need to calculate twice</span>
+        <span class="c1"># Check the min_conf value</span>
+        <span class="c1"># TODO: could be extended to use both lift and conf</span>
+        <span class="k">if</span> <span class="n">conf</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_conf</span> <span class="ow">and</span> <span class="n">lift</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="c1"># Add into arules list if greater than some value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arules_id</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">rule</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ID&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">arules_id</span><span class="p">,</span> <span class="s1">&#39;LEFT&#39;</span><span class="p">:</span> <span class="n">left</span><span class="p">,</span> <span class="s1">&#39;RIGHT&#39;</span><span class="p">:</span> <span class="n">right</span><span class="p">,</span> <span class="s1">&#39;SUP&#39;</span><span class="p">:</span> <span class="n">sup</span><span class="p">,</span> <span class="s1">&#39;CONF&#39;</span><span class="p">:</span> <span class="n">conf</span><span class="p">,</span> <span class="s1">&#39;LIFT&#39;</span><span class="p">:</span> <span class="n">lift</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+            <span class="c1"># LOG the rule</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prntarule</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;SUP&#39;</span><span class="p">,</span> <span class="n">sup</span><span class="p">,</span> <span class="s1">&#39;CONF&#39;</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="s1">&#39;LIFT&#39;</span><span class="p">,</span> <span class="n">lift</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Apriori.extract"><a class="viewcode-back" href="../apriori.html#apriori.Apriori.extract">[docs]</a>    <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Association rule extraction method</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check frequent itemset if contains valuable association rule</span>
+        <span class="c1"># Append the rules greater than some measurements e.g. lift/confidence</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Frequent itemsets:&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq_itemsets</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Rules:&#39;</span><span class="p">)</span>
+        <span class="c1"># Go all over the freq_itemsets</span>
+        <span class="k">for</span> <span class="n">dict_itemset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq_itemsets</span><span class="p">:</span>
+            <span class="n">itemset</span> <span class="o">=</span> <span class="n">dict_itemset</span><span class="p">[</span><span class="s1">&#39;ITEMS&#39;</span><span class="p">]</span>
+            <span class="n">freq</span> <span class="o">=</span> <span class="n">dict_itemset</span><span class="p">[</span><span class="s1">&#39;FREQ&#39;</span><span class="p">]</span>
+            <span class="c1"># Fix for 1-freq itemset</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">itemset</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="c1"># Only need to do, one less length combinations group</span>
+            <span class="c1"># Because previous groups are already extracted</span>
+            <span class="n">combs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">itemset</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">itemset</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">combs</span><span class="p">:</span>
+                <span class="n">left</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+                <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffelems</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">itemset</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">addrule</span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="n">right</span><span class="p">)</span>
+                <span class="c1"># Check also the symmetric rule</span>
+                <span class="c1"># self.addrule(right, left)</span>
+        <span class="c1"># Return association rules</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_rules</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">arules</span></div>
+
+    <span class="k">def</span> <span class="nf">_prntarule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper utility for rules</span>
+
+<span class="sd">        :param left: left handside rule (list)</span>
+<span class="sd">        :param right: right handside rule (list)</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">left</span> <span class="o">==</span> <span class="p">[]</span> <span class="ow">or</span> <span class="n">right</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Rules cannot be empty - apriori::_prntarule&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">  --&gt;  </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Apriori.diffelems"><a class="viewcode-back" href="../apriori.html#apriori.Apriori.diffelems">[docs]</a>    <span class="k">def</span> <span class="nf">diffelems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list1</span><span class="p">,</span> <span class="n">list2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the difference elements in lists, symmetrically.</span>
+<span class="sd">         For example:</span>
+<span class="sd">            list1 = [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;], list2 = [&#39;b&#39;,&#39;c&#39;]</span>
+<span class="sd">            diffelems(list1, list2)</span>
+<span class="sd">            # regardless of order it will return same result</span>
+<span class="sd">            returns -&gt;  [&#39;a&#39;]</span>
+
+<span class="sd">        :param list1: First list to be compared</span>
+<span class="sd">        :param list2: Second list to be compared</span>
+<span class="sd">        :return: The difference elements of first and second lists</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span><span class="o">.</span><span class="n">symmetric_difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">list2</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="Apriori.support_count"><a class="viewcode-back" href="../apriori.html#apriori.Apriori.support_count">[docs]</a>    <span class="k">def</span> <span class="nf">support_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">itemset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the support count of the itemset</span>
+
+<span class="sd">        :param itemset: itemset to be counted (list)</span>
+<span class="sd">        :return: support count of the itemset (int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#print(&#39;---starting support_count&#39;)</span>
+        <span class="n">spcount</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">transaction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span><span class="p">:</span>
+            <span class="c1">#</span>
+            <span class="n">subc</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">itemset</span><span class="p">)</span>
+            <span class="n">subt</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">transaction</span><span class="p">[</span><span class="s1">&#39;ITEMS&#39;</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="n">subc</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">subt</span><span class="p">):</span>
+                <span class="n">spcount</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="c1">#print(&#39;--- support_count finished. The itemset&#39;, itemset ,&#39;has been found&#39;,spcount,&#39;times&#39;)</span>
+        <span class="k">return</span> <span class="n">spcount</span></div>
+
+<div class="viewcode-block" id="Apriori.support"><a class="viewcode-back" href="../apriori.html#apriori.Apriori.support">[docs]</a>    <span class="k">def</span> <span class="nf">support</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">itemset</span><span class="p">,</span> <span class="n">itemset_precalculated</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Counts support</span>
+
+<span class="sd">        :param itemset: itemset (list)</span>
+<span class="sd">        :param itemset_precalculated: Existing suppport count value</span>
+<span class="sd">        :return: support of the itemset (float)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">itemset_precalculated</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sup_count</span> <span class="o">=</span> <span class="n">itemset_precalculated</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sup_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">support_count</span><span class="p">(</span><span class="n">itemset</span><span class="p">)</span>
+        <span class="c1"># Calculate support</span>
+        <span class="n">support</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sup_count</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transaction_count</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">support</span></div>
+
+<div class="viewcode-block" id="Apriori.confidence"><a class="viewcode-back" href="../apriori.html#apriori.Apriori.confidence">[docs]</a>    <span class="k">def</span> <span class="nf">confidence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">left_precalculated</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the confidence of the rule</span>
+
+<span class="sd">        :param left: left handside of the rule (list)</span>
+<span class="sd">        :param right: right handside of the rule (list)</span>
+<span class="sd">        :param left_precalculated: Existing suppport count value</span>
+<span class="sd">        :return: Confidence value (float)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#print(&#39;Calculate the confidence of the left and the right handside of the rules&#39;)</span>
+        <span class="k">if</span> <span class="n">left_precalculated</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">conf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">support_count</span><span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">))</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">left_precalculated</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">conf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">support_count</span><span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">))</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">support_count</span><span class="p">(</span><span class="n">left</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">conf</span></div>
+
+<div class="viewcode-block" id="Apriori.lift"><a class="viewcode-back" href="../apriori.html#apriori.Apriori.lift">[docs]</a>    <span class="k">def</span> <span class="nf">lift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">right_precalculated</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the lift of the rule</span>
+
+<span class="sd">        :param left: left handside of the rule (list)</span>
+<span class="sd">        :param right: right handside of the rule (list)</span>
+<span class="sd">        :param right_precalculated: Existing suppport count value</span>
+<span class="sd">        :return: Confidence value (float)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#print(&#39;Calculate the lift of the left and the right handside of the rules&#39;)</span>
+
+        <span class="k">if</span> <span class="n">right_precalculated</span>  <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sup_right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">support</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">itemset_precalculated</span> <span class="o">=</span> <span class="n">right_precalculated</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sup_right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">support</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+        <span class="c1"># Calculate lift</span>
+        <span class="n">lift</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">))</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">sup_right</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lift</span></div>
+
+<div class="viewcode-block" id="Apriori.freq1_itemsets"><a class="viewcode-back" href="../apriori.html#apriori.Apriori.freq1_itemsets">[docs]</a>    <span class="k">def</span> <span class="nf">freq1_itemsets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f1itemsets</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts the 1 length frequent itemsets</span>
+
+<span class="sd">        :param f1itemsets: 1-length frequent itemsets (dict)</span>
+<span class="sd">        :return: 1-length frequent itemsets (list) greater that self.min_sup</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">f1itemsets</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">f1itemsets</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_sup</span><span class="p">}</span>
+        <span class="n">f1itemsets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">f1itemsets</span><span class="o">.</span><span class="n">items</span><span class="p">())))</span>
+        <span class="n">itemsets</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">candidates</span> <span class="ow">in</span> <span class="n">f1itemsets</span><span class="p">:</span>
+            <span class="n">itemsets</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">candidates</span><span class="p">])</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">itemsets</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Apriori.apriori_gen"><a class="viewcode-back" href="../apriori.html#apriori.Apriori.apriori_gen">[docs]</a>    <span class="k">def</span> <span class="nf">apriori_gen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Fk</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used to generate size k candidates based on the frequent itemsets Fk</span>
+
+<span class="sd">        :param Fk list of k-1 itemsets, k:number of items that should have the new itemsets</span>
+<span class="sd">        :return: new_candidates: list of size k-itemsets,</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_candidates</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Fk</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">Fk</span><span class="p">)):</span>
+                <span class="k">if</span>  <span class="n">Fk</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">Fk</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">-</span><span class="n">k</span><span class="p">]</span><span class="o">==</span><span class="n">Fk</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">Fk</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">-</span><span class="n">k</span><span class="p">]:</span>
+                    <span class="n">Fk1</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">Fk</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">Fk</span><span class="p">[</span><span class="n">j</span><span class="p">])))</span>
+                    <span class="n">new_candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Fk1</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">new_candidates</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Apriori.apriori_run"><a class="viewcode-back" href="../apriori.html#apriori.Apriori.apriori_run">[docs]</a>    <span class="k">def</span> <span class="nf">apriori_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main frequent itemset generation algorithm - Apriori.</span>
+
+<span class="sd">        :return: Frequent itemsets (dict)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Apriori algorithm initiated&quot;</span><span class="p">)</span>
+        <span class="n">start_t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">fid</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Unique frequent itemset id</span>
+        <span class="c1"># All 1-itemsets</span>
+        <span class="n">Fk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniques</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fk</span><span class="p">)</span>
+        <span class="c1"># Find all frequent 1-itemsets</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Tries to find all frequent 1-itemsets&#39;</span><span class="p">)</span>
+        <span class="n">Fk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq1_itemsets</span><span class="p">(</span><span class="n">Fk</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fk</span><span class="p">)</span>
+        <span class="c1"># Add all f1-is to main list</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">Fk</span><span class="p">:</span>
+            <span class="n">fid</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ID&#39;</span><span class="p">:</span> <span class="n">fid</span><span class="p">,</span> <span class="s1">&#39;FREQ&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniques</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="s1">&#39;ITEMS&#39;</span><span class="p">:</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">freq_itemsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="c1"># Until no more Frequent itemset is generated</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">Fk</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> - iteration&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
+            <span class="c1"># Generate candidate itemsets</span>
+            <span class="n">Ck</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apriori_gen</span><span class="p">(</span><span class="n">Fk</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+            <span class="n">Fk</span><span class="o">=</span><span class="p">[]</span>
+            <span class="n">Fk_full</span><span class="o">=</span><span class="p">[]</span>
+            <span class="c1">#print(&#39;Ck:&#39;, len(Ck) ,Ck[0])</span>
+            <span class="k">for</span> <span class="n">transaction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">Ck</span><span class="p">:</span>
+                    <span class="c1">#print(&#39;cand&#39;,candidate)</span>
+                    <span class="n">subc</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+                    <span class="n">subt</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">transaction</span><span class="p">[</span><span class="s1">&#39;ITEMS&#39;</span><span class="p">]))</span>
+                    <span class="k">if</span> <span class="n">subc</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">subt</span><span class="p">):</span>
+                        <span class="n">Fk_full</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">candidate</span><span class="p">))</span>
+            <span class="c1"># Counting all itemsets</span>
+            <span class="n">count_itemsets</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="n">Fk_full</span><span class="p">)</span>
+            <span class="c1">#print(&#39;count&#39;,count_itemsets.keys())</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">count_itemsets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c1"># Select just the frequent itemsets</span>
+                <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_sup</span><span class="p">:</span>
+                    <span class="c1"># Clear the items from the string format</span>
+                    <span class="n">set_s</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;[&#39;&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;]&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Fk</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">Fk</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">set_s</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">Fk</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Fk</span><span class="p">),</span> <span class="n">set_s</span><span class="p">)</span>
+                    <span class="c1"># Save frequent itemset</span>
+                    <span class="n">fid</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">t</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ID&#39;</span><span class="p">:</span> <span class="n">fid</span><span class="p">,</span> <span class="s1">&#39;FREQ&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;ITEMS&#39;</span><span class="p">:</span> <span class="n">Fk</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]}</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">freq_itemsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="c1"># Performance measurements</span>
+        <span class="n">total_t</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_t</span><span class="p">,</span> <span class="s1">&#39;.4f&#39;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Apriori took </span><span class="si">{:&gt;10}</span><span class="s2"> seconds&quot;</span>
+              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">total_t</span><span class="p">))</span>
+        <span class="c1"># Return frequent itemsets</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Transactions:&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">transaction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">transaction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_freqis</span><span class="p">()</span>
+        <span class="k">return</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">freq_itemsets</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Apriori.save_freqis"><a class="viewcode-back" href="../apriori.html#apriori.Apriori.save_freqis">[docs]</a>    <span class="k">def</span> <span class="nf">save_freqis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;frequent_itemsets.csv&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the frequent itemsets into a file</span>
+
+<span class="sd">        :param path: Path to be saved</span>
+<span class="sd">        :return: Returns true on successful save</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving the frequent itemsets into </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">start_t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ID,FREQUENCY,ITEMS</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq_itemsets</span><span class="p">:</span>
+                <span class="n">print_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;FREQ&#39;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;ITEMS&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">print_str</span> <span class="o">+=</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;ITEMS&#39;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;ITEMS&#39;</span><span class="p">]:</span>
+                        <span class="n">print_str</span> <span class="o">+=</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="n">i</span>
+                <span class="n">print_str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">print_str</span><span class="p">)</span>
+        <span class="c1"># Performance measurements</span>
+        <span class="n">total_t</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_t</span><span class="p">,</span> <span class="s1">&#39;.4f&#39;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Save procedure took </span><span class="si">{:&gt;10}</span><span class="s2"> seconds&quot;</span>
+              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">total_t</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Apriori.save_rules"><a class="viewcode-back" href="../apriori.html#apriori.Apriori.save_rules">[docs]</a>    <span class="k">def</span> <span class="nf">save_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;arules.csv&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves the association rules into a file</span>
+
+<span class="sd">        :param path: Path to be saved</span>
+<span class="sd">        :return: Returns true on successful action</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Rules saved to </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+
+        <span class="n">start_t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ID,LEFT,RIGHT,SUP,CONF,LIFT</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arules</span><span class="p">:</span>
+                <span class="n">print_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;LEFT&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;RIGHT&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                            <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;SUP&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;CONF&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;LIFT&#39;</span><span class="p">])</span>
+                <span class="n">print_str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">print_str</span><span class="p">)</span>
+        <span class="c1"># Performance measurements</span>
+        <span class="n">total_t</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_t</span><span class="p">,</span> <span class="s1">&#39;.4f&#39;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Save procedure took </span><span class="si">{:&gt;10}</span><span class="s2"> seconds&quot;</span>
+              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">total_t</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Apriori.export"><a class="viewcode-back" href="../apriori.html#apriori.Apriori.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export rules in PMML format to visualize later on using R-packages.</span>
+
+<span class="sd">        :param path: path to write the PMML file</span>
+<span class="sd">        :return: True on on successful operation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">arules</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="k">raise</span><span class="p">(</span><span class="s1">&#39;Cannot export - arules empty&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq_itemsets</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="k">raise</span><span class="p">(</span><span class="s1">&#39;Cannot export - freq_itemsets empty&#39;</span><span class="p">)</span>
+        <span class="c1"># Exporter</span>
+        <span class="n">exporter</span> <span class="o">=</span> <span class="n">PMML_Exporter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_sup</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_conf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">transaction_count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniques</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq_itemsets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">arules</span><span class="p">)</span>
+        <span class="n">exporter</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_print_freq_is</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper function to print frequent itemsets</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">print_str</span> <span class="o">=</span> <span class="s2">&quot;ID,FREQUENCY,ITEMS</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq_itemsets</span><span class="p">:</span>
+            <span class="n">print_str</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;FREQ&#39;</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;ITEMS&#39;</span><span class="p">]:</span>
+                <span class="n">print_str</span> <span class="o">+=</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="n">i</span>
+            <span class="n">print_str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">print_str</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Ege Can Ozer, Agustin Zuniga.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

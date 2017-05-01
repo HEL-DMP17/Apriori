@@ -1,0 +1,7 @@
+pmml\_exporter module
+=====================
+
+.. automodule:: pmml_exporter
+    :members:
+    :undoc-members:
+    :show-inheritance:

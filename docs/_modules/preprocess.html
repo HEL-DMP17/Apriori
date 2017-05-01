@@ -1,0 +1,469 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>preprocess &#8212; Apriori 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for preprocess</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Global modules</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="c1"># Internal modules</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="k">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="PreProcessor"><a class="viewcode-back" href="../preprocess.html#preprocess.PreProcessor">[docs]</a><span class="k">class</span> <span class="nc">PreProcessor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The preprocessor class that handles binarization and discretization of dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trans_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mapper</span> <span class="o">=</span> <span class="n">PreProcessor</span><span class="o">.</span><span class="n">Mapper</span><span class="p">()</span>
+
+<div class="viewcode-block" id="PreProcessor.get_transactions"><a class="viewcode-back" href="../preprocess.html#preprocess.PreProcessor.get_transactions">[docs]</a>    <span class="k">def</span> <span class="nf">get_transactions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter method for transactions list of OrderedDict</span>
+
+<span class="sd">        :return: Transactions list (list(OrderedDict))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span></div>
+
+<div class="viewcode-block" id="PreProcessor.get_uniques"><a class="viewcode-back" href="../preprocess.html#preprocess.PreProcessor.get_uniques">[docs]</a>    <span class="k">def</span> <span class="nf">get_uniques</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter method for unique itemsets (dictionary)</span>
+
+<span class="sd">        :return: Unique itemsets (dict), key: items, value: counts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique</span></div>
+
+<div class="viewcode-block" id="PreProcessor.get_transaction_count"><a class="viewcode-back" href="../preprocess.html#preprocess.PreProcessor.get_transaction_count">[docs]</a>    <span class="k">def</span> <span class="nf">get_transaction_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Getter method for transaction count after parsing the file</span>
+
+<span class="sd">        :return: Transaction count (int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans_count</span></div>
+
+<div class="viewcode-block" id="PreProcessor.parse_file"><a class="viewcode-back" href="../preprocess.html#preprocess.PreProcessor.parse_file">[docs]</a>    <span class="k">def</span> <span class="nf">parse_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; The main function to parse the file and run the preprocesser methods</span>
+
+<span class="sd">        :param file: Filepath of the data</span>
+<span class="sd">        :return: Returns number of the transaction parsed (int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Preprocess begin to parse the file&quot;</span><span class="p">)</span>
+        <span class="n">start_t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+        <span class="n">mp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapper</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">chars</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="c1"># Get all the necessary fields here</span>
+                <span class="n">sex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span> <span class="n">mp</span><span class="o">.</span><span class="n">sex</span><span class="p">)</span>
+                <span class="n">race</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span> <span class="n">mp</span><span class="o">.</span><span class="n">race</span><span class="p">)</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span> <span class="n">mp</span><span class="o">.</span><span class="n">score</span><span class="p">)</span>
+                <span class="c1"># lang_native=self.get_field(chars,mp.lang_native)</span>
+                <span class="n">fam_comp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span><span class="n">mp</span><span class="o">.</span><span class="n">fam_comp</span><span class="p">)</span>
+                <span class="n">par_edu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span><span class="n">mp</span><span class="o">.</span><span class="n">par_edu</span><span class="p">)</span>
+                <span class="n">income</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span><span class="n">mp</span><span class="o">.</span><span class="n">income</span><span class="p">)</span>
+                <span class="n">s_expect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span><span class="n">mp</span><span class="o">.</span><span class="n">s_expect</span><span class="p">)</span>
+                <span class="n">control</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span><span class="n">mp</span><span class="o">.</span><span class="n">control</span><span class="p">)</span>
+                <span class="n">sc_loc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span><span class="n">mp</span><span class="o">.</span><span class="n">sc_loc</span><span class="p">)</span>
+                <span class="c1"># fight=self.get_field(chars,mp.fight)</span>
+                <span class="n">late</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span> <span class="n">mp</span><span class="o">.</span><span class="n">late</span><span class="p">)</span>
+                <span class="n">homework</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span> <span class="n">mp</span><span class="o">.</span><span class="n">homework</span><span class="p">)</span>
+                <span class="n">sh_accomp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span> <span class="n">mp</span><span class="o">.</span><span class="n">sh_accomp</span><span class="p">)</span>
+                <span class="n">sh_poorp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span> <span class="n">mp</span><span class="o">.</span><span class="n">sh_poorp</span><span class="p">)</span>
+                <span class="n">good_grec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span> <span class="n">mp</span><span class="o">.</span><span class="n">good_grec</span><span class="p">)</span>
+                <span class="n">likes_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span> <span class="n">mp</span><span class="o">.</span><span class="n">likes_s</span><span class="p">)</span>
+                <span class="n">library</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span> <span class="n">mp</span><span class="o">.</span><span class="n">library</span><span class="p">)</span>
+
+                <span class="c1"># Add this into transaction. Put all the fields into the list</span>
+                <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">sex</span><span class="p">,</span> <span class="n">race</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">fam_comp</span><span class="p">,</span>
+                          <span class="n">par_edu</span><span class="p">,</span><span class="n">income</span><span class="p">,</span> <span class="n">s_expect</span><span class="p">,</span> <span class="n">control</span><span class="p">,</span> <span class="n">sc_loc</span><span class="p">,</span>
+                          <span class="n">late</span><span class="p">,</span> <span class="n">homework</span><span class="p">,</span> <span class="n">sh_accomp</span><span class="p">,</span> <span class="n">sh_poorp</span><span class="p">,</span>
+                          <span class="n">good_grec</span><span class="p">,</span> <span class="n">likes_s</span><span class="p">,</span> <span class="n">library</span><span class="p">]</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_transaction</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+        <span class="c1"># Performance measurements</span>
+        <span class="n">total_t</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_t</span><span class="p">,</span> <span class="s1">&#39;.4f&#39;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Preprocessing took </span><span class="si">{:&gt;10}</span><span class="s2"> seconds&quot;</span>
+              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">total_t</span><span class="p">))</span>
+        <span class="c1"># Return number of transactions added</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans_count</span></div>
+
+<div class="viewcode-block" id="PreProcessor.get_field"><a class="viewcode-back" href="../preprocess.html#preprocess.PreProcessor.get_field">[docs]</a>    <span class="k">def</span> <span class="nf">get_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">mapper</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Selects the appropriate preprocessing method according to line and mapper structure</span>
+
+<span class="sd">        :param line: New line of data (str)</span>
+<span class="sd">        :param mapper: Corresponding mapper structure of the field</span>
+<span class="sd">        :return: Preprocessed field (str)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;STR&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span> <span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;END&#39;</span><span class="p">]]</span>
+        <span class="c1"># Check the type and execute either discretize/binarize etc.</span>
+        <span class="k">if</span> <span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;TYPE&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;BINARY&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_name</span><span class="p">(</span><span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;COL&#39;</span><span class="p">],</span> <span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;VALS&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)])</span>
+        <span class="k">elif</span> <span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;TYPE&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarize</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>  <span class="c1"># Change here later for OTHER field</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">discretize</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="PreProcessor.add_transaction"><a class="viewcode-back" href="../preprocess.html#preprocess.PreProcessor.add_transaction">[docs]</a>    <span class="k">def</span> <span class="nf">add_transaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds the preprocessed fields into the transaction list</span>
+
+<span class="sd">        :param fields: Preprocessed fields (list)</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trans_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="c1"># Add the fields here, True is only used to have</span>
+        <span class="c1"># OrderedSet kind of data structure</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">({</span><span class="n">f</span><span class="p">:</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">})</span>  <span class="c1"># more pythonic way to populate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_unique</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>  <span class="c1"># Updates unique dict</span>
+        <span class="c1"># Use keys to sort the dict</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">_</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ID&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trans_count</span><span class="p">,</span> <span class="s1">&#39;ITEMS&#39;</span><span class="p">:</span> <span class="n">items</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PreProcessor.count_unique"><a class="viewcode-back" href="../preprocess.html#preprocess.PreProcessor.count_unique">[docs]</a>    <span class="k">def</span> <span class="nf">count_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates the count of unique fields</span>
+
+<span class="sd">        :param fields: List of fields</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">unique</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">unique</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">_</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="PreProcessor.discretize"><a class="viewcode-back" href="../preprocess.html#preprocess.PreProcessor.discretize">[docs]</a>    <span class="k">def</span> <span class="nf">discretize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapper</span><span class="p">,</span> <span class="n">col_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used to discretize the continous values from the given mapper and value</span>
+
+<span class="sd">        :param mapper: Mapper of the continious field  (Mapper Class)</span>
+<span class="sd">        :param col_data: Value of the continous field (float)</span>
+<span class="sd">        :return: Returns discretized name of the field (string)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">max</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;MAX&#39;</span><span class="p">])</span>
+        <span class="nb">min</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;MIN&#39;</span><span class="p">])</span>
+        <span class="n">interval</span> <span class="o">=</span> <span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;INTERVAL&#39;</span><span class="p">]</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span> <span class="o">-</span> <span class="nb">min</span><span class="p">)</span> <span class="o">/</span> <span class="n">interval</span>
+        <span class="c1"># Initial check to decide in which range it belongs to</span>
+        <span class="n">lower</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="s1">&#39;.2f&#39;</span><span class="p">))</span>
+        <span class="n">upper</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">lower</span> <span class="o">+</span> <span class="n">step</span><span class="p">,</span> <span class="s1">&#39;.2f&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">col_data</span> <span class="o">&gt;=</span> <span class="n">lower</span> <span class="ow">and</span> <span class="n">col_data</span> <span class="o">&lt;=</span> <span class="n">upper</span><span class="p">:</span>
+            <span class="n">str_interval</span> <span class="o">=</span> <span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">lower</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">upper</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span>
+            <span class="c1"># print(&#39;Lower : &#39; + str(lower) + &#39; Upper : &#39; + str(upper)</span>
+            <span class="c1">#       + &#39; Value : &#39; + str(col_data) + &#39; Interval : &#39; + str_interval)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_name</span><span class="p">(</span><span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;COL&#39;</span><span class="p">],</span> <span class="n">str_interval</span><span class="p">)</span>
+
+        <span class="c1"># Check the boundries until the end of the interval value</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="p">):</span>
+            <span class="n">lower</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">upper</span><span class="p">,</span> <span class="s1">&#39;.2f&#39;</span><span class="p">))</span>
+            <span class="n">upper</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">upper</span> <span class="o">+</span> <span class="n">step</span><span class="p">,</span> <span class="s1">&#39;.2f&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">col_data</span> <span class="o">&gt;=</span> <span class="n">lower</span> <span class="ow">and</span> <span class="n">col_data</span> <span class="o">&lt;=</span> <span class="n">upper</span><span class="p">:</span>
+                <span class="n">str_interval</span> <span class="o">=</span> <span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">lower</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">upper</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span>
+                <span class="c1"># print(&#39;Lower : &#39; + str(lower) + &#39; Upper : &#39; + str(upper)</span>
+                <span class="c1">#       + &#39; Value : &#39; + str(col_data) + &#39; Interval : &#39; + str_interval)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_name</span><span class="p">(</span><span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;COL&#39;</span><span class="p">],</span> <span class="n">str_interval</span><span class="p">)</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Value is not between the intervals check preprocessor::discretize&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PreProcessor.binarize"><a class="viewcode-back" href="../preprocess.html#preprocess.PreProcessor.binarize">[docs]</a>    <span class="k">def</span> <span class="nf">binarize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapper</span><span class="p">,</span> <span class="n">col_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Binarize the attribute data using mapper</span>
+
+<span class="sd">        :param col_data: Categorical data assumed to be between -9 and 25</span>
+<span class="sd">        :param mapper: Corresponding mapper of this field</span>
+<span class="sd">        :return: Binarized field (str)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mapper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Give an appropriate mapper&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">col_data</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">9</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Values cannot be less than -9 - check binarize method in preprocess.py&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Change this, in case if we break something</span>
+        <span class="n">max_categorical_value</span> <span class="o">=</span> <span class="mi">25</span>
+        <span class="k">if</span> <span class="n">col_data</span> <span class="o">&gt;</span> <span class="n">max_categorical_value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Values cannot be more than 25 - check binarize method in preprocess.py&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Return proper COL_IS_ATTR name</span>
+        <span class="k">if</span> <span class="n">col_data</span> <span class="ow">in</span> <span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;VALS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;OTHERS&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">col_data</span> <span class="ow">in</span> <span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;OTHERS&#39;</span><span class="p">]:</span>
+                    <span class="c1"># Others</span>
+                    <span class="n">nm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_name</span><span class="p">(</span><span class="n">col</span><span class="o">=</span><span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;COL&#39;</span><span class="p">],</span> <span class="n">attr</span><span class="o">=</span><span class="s2">&quot;OTHERS&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">col_data</span> <span class="ow">in</span> <span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;VALS&#39;</span><span class="p">]:</span>
+                    <span class="c1"># Map as standalone field</span>
+                    <span class="n">nm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_name</span><span class="p">(</span><span class="n">col</span><span class="o">=</span><span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;COL&#39;</span><span class="p">],</span> <span class="n">attr</span><span class="o">=</span><span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;VALS&#39;</span><span class="p">][</span><span class="n">col_data</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Something unusual in preprocessor::binarize happened&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Map as standalone field</span>
+                <span class="n">nm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_name</span><span class="p">(</span><span class="n">col</span><span class="o">=</span><span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;COL&#39;</span><span class="p">],</span> <span class="n">attr</span><span class="o">=</span><span class="n">mapper</span><span class="p">[</span><span class="s1">&#39;VALS&#39;</span><span class="p">][</span><span class="n">col_data</span><span class="p">])</span>
+
+            <span class="c1"># Return the name</span>
+            <span class="k">return</span> <span class="n">nm</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;This key is not inside our mapper VALS - check binarize method in preprocess.py&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PreProcessor.save_transactions"><a class="viewcode-back" href="../preprocess.html#preprocess.PreProcessor.save_transactions">[docs]</a>    <span class="k">def</span> <span class="nf">save_transactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;transactions.csv&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the preprocessed transactions into a file</span>
+
+<span class="sd">        :param path: Path to be saved</span>
+<span class="sd">        :return: Returns true on successful save</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Saving the transactions into </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">start_t</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ID,ITEMS</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span><span class="p">:</span>
+                <span class="n">print_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;ITEMS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">print_str</span> <span class="o">+=</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="n">i</span>
+                <span class="n">print_str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">print_str</span><span class="p">)</span>
+        <span class="c1"># Performance measurements</span>
+        <span class="n">total_t</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_t</span><span class="p">,</span> <span class="s1">&#39;.4f&#39;</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Save procedure took </span><span class="si">{:&gt;10}</span><span class="s2"> seconds&quot;</span>
+              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">total_t</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="k">def</span> <span class="nf">_print_transactions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used to print transactions in csv format</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">print_str</span> <span class="o">=</span> <span class="s2">&quot;ID,ITEMS</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transactions</span><span class="p">:</span>
+            <span class="n">print_str</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">t</span><span class="p">[</span><span class="s1">&#39;ITEMS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">print_str</span> <span class="o">+=</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="n">i</span>
+            <span class="n">print_str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">print_str</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_is_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used to construct the itemset name with combination of column and attiribute</span>
+
+<span class="sd">        :param col: Column name of the data (str)</span>
+<span class="sd">        :param attr: Attribute name of the data (str)</span>
+<span class="sd">        :return: Itemset name (str)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">col</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;_IS_&quot;</span> <span class="o">+</span> <span class="n">attr</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="c1"># Until getting nice representation using files(possibly JSON) use this structure</span>
+    <span class="c1"># later we can create the file structure and parser for that.</span>
+<div class="viewcode-block" id="PreProcessor.Mapper"><a class="viewcode-back" href="../preprocess.html#preprocess.PreProcessor.Mapper">[docs]</a>    <span class="k">class</span> <span class="nc">Mapper</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used to map the fields</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="c1"># Some fields can change</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sex</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;SEX&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;BINARY&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+                        <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;MALE&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;FEMALE&#39;</span><span class="p">}}</span>
+
+            <span class="c1"># Combine fields that are in others together</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">race</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;RACE&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">26</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">27</span><span class="p">,</span>
+                         <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;HISP_NR&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;HISP_RC&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;BLACK&#39;</span><span class="p">},</span>
+                         <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;AMER&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;ASIA&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;BLACK&#39;</span><span class="p">,</span>
+                                  <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;HISP_NR&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;HISP_RC&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MULT&#39;</span><span class="p">,</span>
+                                  <span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;WHITE&#39;</span><span class="p">}}</span>
+
+            <span class="c1"># SCORE_IS-20_60 , 35.12</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;SCORE&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CONTINIOUS&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">106</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">111</span><span class="p">,</span>
+                          <span class="s1">&#39;MIN&#39;</span><span class="p">:</span> <span class="mf">20.91</span><span class="p">,</span> <span class="s1">&#39;MAX&#39;</span><span class="p">:</span> <span class="mf">81.04</span><span class="p">,</span> <span class="s1">&#39;INTERVAL&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+
+            <span class="c1"># Whether English is student&#39;s native language-composite</span>
+            <span class="c1"># self.lang_native = {&#39;COL&#39;: &#39;ENG_LANG_NATIVE&#39;, &#39;TYPE&#39;: &#39;BINARY&#39;, &#39;STR&#39;: 28, &#39;END&#39;: 29,</span>
+            <span class="c1">#             &#39;OTHERS&#39;: None,</span>
+            <span class="c1">#             &#39;VALS&#39;: {0: &#39;NO&#39;, 1: &#39;YES&#39;}}</span>
+
+            <span class="c1"># Family composition</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fam_comp</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;FAM&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">43</span><span class="p">,</span>
+                         <span class="s1">&#39;OTHERS&#39;</span><span class="p">:{</span><span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;GG&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;FEG&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span> <span class="s1">&#39;MAG&#39;</span><span class="p">,</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;HALFTIME&#39;</span><span class="p">},</span>
+                         <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;MF&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;MG&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;FG&#39;</span><span class="p">,</span>
+                                  <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;GG&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span>
+                                  <span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;FEG&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span> <span class="s1">&#39;MAG&#39;</span><span class="p">,</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;HALFTIME&#39;</span><span class="p">}}</span>
+
+            <span class="c1"># Parents&#39; highest level of education</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">par_edu</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;PAR_EDU&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">44</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span>
+                                <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                                <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;UHS&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;HS&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;US&#39;</span><span class="p">,</span>
+                                         <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;UC&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span>
+                                         <span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span> <span class="s1">&#39;PHD&#39;</span><span class="p">}}</span>
+
+            <span class="c1"># Total family income from all sources 2001-composite</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">income</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;INCOME&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">54</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">55</span><span class="p">,</span>
+                            <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;NONE&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;0-1K&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;1-5K&#39;</span><span class="p">},</span>
+                            <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;NONE&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;0-1K&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;1-5K&#39;</span><span class="p">,</span>
+                                     <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;5-10K&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;10-15K&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;15-20K&#39;</span><span class="p">,</span>
+                                     <span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;20-25K&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span> <span class="s1">&#39;25-35K&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;35-50K&#39;</span><span class="p">,</span>
+                                     <span class="mi">10</span><span class="p">:</span> <span class="s1">&#39;50-75K&#39;</span><span class="p">,</span> <span class="mi">11</span><span class="p">:</span> <span class="s1">&#39;75-100K&#39;</span><span class="p">,</span><span class="mi">12</span><span class="p">:</span> <span class="s1">&#39;100-200K&#39;</span><span class="p">,</span>
+                                     <span class="mi">13</span><span class="p">:</span> <span class="s1">&#39;200K-more&#39;</span><span class="p">}}</span>
+
+            <span class="c1"># How far in school student thinks will get-composite</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">s_expect</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;S_EXPEC&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">72</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">73</span><span class="p">,</span>
+                                <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                                <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="s1">&#39;UK&#39;</span><span class="p">,</span>
+                                         <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;UHS&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;HS&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span>
+                                         <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;UC&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span>
+                                         <span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;PHD&#39;</span><span class="p">}}</span>
+
+            <span class="c1"># School control</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">control</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;SC_CTRL&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">253</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">253</span><span class="p">,</span>
+                             <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;PUB&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;CAT&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;PRI&#39;</span><span class="p">}}</span>
+
+            <span class="c1"># School urbanicity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sc_loc</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;SC_LOC&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">254</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">254</span><span class="p">,</span>
+                          <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;UR&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;SUB&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;RU&#39;</span><span class="p">}}</span>
+
+            <span class="c1"># Got into a physical fight at school</span>
+            <span class="c1"># self.fight = {&#39;COL&#39;: &#39;FIGHT&#39;, &#39;TYPE&#39;: &#39;CATEGORICAL&#39;, &#39;STR&#39;: 336, &#39;END&#39;: 337,</span>
+            <span class="c1">#                  &#39;OTHERS&#39;: {-9: &#39;MISSING&#39;, -7: &#39;NOT_INTERV&#39;, -6: &#39;MUL_RESP&#39;},</span>
+            <span class="c1">#                  &#39;VALS&#39;: {-9: &#39;MISSING&#39;, -7: &#39;NOT_INTERV&#39;, -6: &#39;MUL_RESP&#39;,</span>
+            <span class="c1">#                           1: &#39;NEVER&#39;, 2: &#39;1-2&#39;, 3: &#39;2-MORE&#39;}}</span>
+
+            <span class="c1"># Got into a physical fight at school</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">late</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;LATE&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">358</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">359</span><span class="p">,</span>
+                          <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;NOT_INTERV&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MUL_RESP&#39;</span><span class="p">},</span>
+                          <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;NOT_INTERV&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MUL_RESP&#39;</span><span class="p">,</span>
+                                   <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;NEVER&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;1-2&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;3-6&#39;</span><span class="p">,</span>
+                                   <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;7-9&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;10-more&#39;</span><span class="p">}}</span>
+
+            <span class="c1"># How often student completes homework</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">homework</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;HOMEWORK&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">1610</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">1611</span><span class="p">,</span>
+                         <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MUL_RESP&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;NO_ASW&#39;</span><span class="p">,</span>
+                                    <span class="o">-</span><span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;SKIP_ANS&#39;</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span> <span class="p">:</span> <span class="s1">&#39;DONT_K&#39;</span><span class="p">},</span>
+                         <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MUL_RESP&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;NO_ASW&#39;</span><span class="p">,</span>
+                                  <span class="o">-</span><span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;SKIP_ANS&#39;</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span> <span class="p">:</span> <span class="s1">&#39;DONT_K&#39;</span><span class="p">,</span>
+                                  <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;NEVER&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;RARELY&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;SOMET&#39;</span><span class="p">,</span>
+                                  <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;MOSTT&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;ALLT&#39;</span><span class="p">}}</span>
+
+            <span class="c1"># Spoke to parents about accomplishments (English)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sh_accomp</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;SH_ACCOMP&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">1590</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">1591</span><span class="p">,</span>
+                         <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;NO_ASW&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;SKIP_ANS&#39;</span><span class="p">},</span>
+                         <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;NO_ASW&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;SKIP_ANS&#39;</span><span class="p">,</span>
+                                  <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;YES&#39;</span><span class="p">}}</span>
+
+            <span class="c1">#Spoke to parents about poor performance (English)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sh_poorp</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;SH_POORP&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">1582</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">1583</span><span class="p">,</span>
+                              <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MUL_RESP&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;NO_ASW&#39;</span><span class="p">,</span>
+                                         <span class="o">-</span><span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;SKIP_ANS&#39;</span><span class="p">},</span>
+                              <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MUL_RESP&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;NO_ASW&#39;</span><span class="p">,</span>
+                                       <span class="o">-</span><span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;SKIP_ANS&#39;</span><span class="p">,</span>
+                                       <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;YES&#39;</span><span class="p">}}</span>
+
+            <span class="c1"># Recognized for good grades</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">good_grec</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;RECOG&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">350</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">351</span><span class="p">,</span>
+                         <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;NOT_INTERV&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MUL_RESP&#39;</span><span class="p">},</span>
+                         <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;NOT_INTERV&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MUL_RESP&#39;</span><span class="p">,</span>
+                                  <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;YES&#39;</span><span class="p">}}</span>
+
+            <span class="c1"># How much likes school</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">likes_s</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;LIKES_S&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">428</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">429</span><span class="p">,</span>
+                         <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MUL_RESP&#39;</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span> <span class="p">:</span> <span class="s1">&#39;DONT_K&#39;</span><span class="p">},</span>
+                         <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MUL_RESP&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="p">:</span> <span class="s1">&#39;DONT_K&#39;</span><span class="p">,</span>
+                                  <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;SOME&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;YES&#39;</span><span class="p">}}</span>
+
+            <span class="c1"># Use of school library for assignments</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">library</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COL&#39;</span><span class="p">:</span> <span class="s1">&#39;LIBRARY&#39;</span><span class="p">,</span> <span class="s1">&#39;TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">,</span> <span class="s1">&#39;STR&#39;</span><span class="p">:</span> <span class="mi">708</span><span class="p">,</span> <span class="s1">&#39;END&#39;</span><span class="p">:</span> <span class="mi">709</span><span class="p">,</span>
+                            <span class="s1">&#39;OTHERS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;NOT_INTERV&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MUL_RESP&#39;</span><span class="p">,</span>
+                                       <span class="o">-</span><span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;SKIP_ANS&#39;</span><span class="p">},</span>
+                            <span class="s1">&#39;VALS&#39;</span><span class="p">:</span> <span class="p">{</span><span class="o">-</span><span class="mi">9</span><span class="p">:</span> <span class="s1">&#39;MISSING&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MUL_RESP&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;DONT_K&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;SKIP_ANS&#39;</span><span class="p">,</span>
+                                     <span class="o">-</span><span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;NOT_INTERV&#39;</span><span class="p">,</span>
+                                     <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;NEVER&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;RARELY&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;SOMET&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;OFTEN&#39;</span><span class="p">}}</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Ege Can Ozer, Agustin Zuniga.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

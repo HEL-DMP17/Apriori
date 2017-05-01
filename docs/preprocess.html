@@ -1,0 +1,281 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>preprocess module &#8212; Apriori 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-preprocess">
+<span id="preprocess-module"></span><h1>preprocess module<a class="headerlink" href="#module-preprocess" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="preprocess.PreProcessor">
+<em class="property">class </em><code class="descclassname">preprocess.</code><code class="descname">PreProcessor</code><a class="reference internal" href="_modules/preprocess.html#PreProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#preprocess.PreProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>The preprocessor class that handles binarization and discretization of dataset</p>
+<dl class="class">
+<dt id="preprocess.PreProcessor.Mapper">
+<em class="property">class </em><code class="descname">Mapper</code><a class="reference internal" href="_modules/preprocess.html#PreProcessor.Mapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#preprocess.PreProcessor.Mapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Used to map the fields</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="preprocess.PreProcessor.add_transaction">
+<code class="descname">add_transaction</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/preprocess.html#PreProcessor.add_transaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#preprocess.PreProcessor.add_transaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the preprocessed fields into the transaction list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fields</strong> &#8211; Preprocessed fields (list)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="preprocess.PreProcessor.binarize">
+<code class="descname">binarize</code><span class="sig-paren">(</span><em>mapper</em>, <em>col_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/preprocess.html#PreProcessor.binarize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#preprocess.PreProcessor.binarize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Binarize the attribute data using mapper</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>col_data</strong> &#8211; Categorical data assumed to be between -9 and 25</li>
+<li><strong>mapper</strong> &#8211; Corresponding mapper of this field</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Binarized field (str)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="preprocess.PreProcessor.count_unique">
+<code class="descname">count_unique</code><span class="sig-paren">(</span><em>fields</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/preprocess.html#PreProcessor.count_unique"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#preprocess.PreProcessor.count_unique" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the count of unique fields</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fields</strong> &#8211; List of fields</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="preprocess.PreProcessor.discretize">
+<code class="descname">discretize</code><span class="sig-paren">(</span><em>mapper</em>, <em>col_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/preprocess.html#PreProcessor.discretize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#preprocess.PreProcessor.discretize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to discretize the continous values from the given mapper and value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mapper</strong> &#8211; Mapper of the continious field  (Mapper Class)</li>
+<li><strong>col_data</strong> &#8211; Value of the continous field (float)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Returns discretized name of the field (string)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="preprocess.PreProcessor.get_field">
+<code class="descname">get_field</code><span class="sig-paren">(</span><em>line</em>, <em>mapper</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/preprocess.html#PreProcessor.get_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#preprocess.PreProcessor.get_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects the appropriate preprocessing method according to line and mapper structure</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line</strong> &#8211; New line of data (str)</li>
+<li><strong>mapper</strong> &#8211; Corresponding mapper structure of the field</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Preprocessed field (str)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="preprocess.PreProcessor.get_transaction_count">
+<code class="descname">get_transaction_count</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/preprocess.html#PreProcessor.get_transaction_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#preprocess.PreProcessor.get_transaction_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter method for transaction count after parsing the file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Transaction count (int)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="preprocess.PreProcessor.get_transactions">
+<code class="descname">get_transactions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/preprocess.html#PreProcessor.get_transactions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#preprocess.PreProcessor.get_transactions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter method for transactions list of OrderedDict</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Transactions list (list(OrderedDict))</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="preprocess.PreProcessor.get_uniques">
+<code class="descname">get_uniques</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/preprocess.html#PreProcessor.get_uniques"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#preprocess.PreProcessor.get_uniques" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter method for unique itemsets (dictionary)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Unique itemsets (dict), key: items, value: counts</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="preprocess.PreProcessor.parse_file">
+<code class="descname">parse_file</code><span class="sig-paren">(</span><em>file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/preprocess.html#PreProcessor.parse_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#preprocess.PreProcessor.parse_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main function to parse the file and run the preprocesser methods</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file</strong> &#8211; Filepath of the data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns number of the transaction parsed (int)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="preprocess.PreProcessor.save_transactions">
+<code class="descname">save_transactions</code><span class="sig-paren">(</span><em>path='transactions.csv'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/preprocess.html#PreProcessor.save_transactions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#preprocess.PreProcessor.save_transactions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the preprocessed transactions into a file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; Path to be saved</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns true on successful save</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/preprocess.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Ege Can Ozer, Agustin Zuniga.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/preprocess.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
