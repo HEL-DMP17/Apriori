@@ -12,6 +12,8 @@ library("igraph")
 setwd("C:/Users/eozer/Documents/GitHub/Apriori")
 
 rules <- read.PMML("pmml_rules.xml")
+rules <- head(sort(rules, by="lift"), 50)
+
 
 ig <- plot( rules, method="graph", control=list(type="items") )
 
@@ -27,13 +29,14 @@ nodez = data.frame(
 # Interactive assoc rule network
 visNetwork(
     nodes = nodez
-    , edges = ig_df$edges,  main = "ARule Network", width = "100%"
+    , edges = ig_df$edges,  main = "First 50 association rule network sorted by lift",
+    width = "100%", height = "700px"
 ) %>% 
     visIgraphLayout() %>%
     visEdges(shadow = FALSE,
              arrows =list(to = list(enabled = TRUE, scaleFactor = 2)),
              color = list(color = "lightblue", highlight = "red")) %>%
-    visOptions(highlightNearest = list(enabled = T, hover = T),
+    visOptions(highlightNearest = list(enabled = T, hover = F),
                nodesIdSelection = TRUE) %>% 
     visInteraction(navigationButtons = TRUE)
 # Interactive table

@@ -37,7 +37,7 @@ class Apriori:
         lift = self.lift(left, right)  # this is a symmetric measure no need to calculate twice
         # Check the min_conf value
         # TODO: could be extended to use both lift and conf
-        if conf > self.min_conf:
+        if conf > self.min_conf and lift > 1.0:
             # Add into arules list if greater than some value
             self.arules_id += 1
             rule = {'ID': self.arules_id, 'LEFT': left, 'RIGHT': right, 'SUP': sup, 'CONF': conf, 'LIFT': lift}

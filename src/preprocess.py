@@ -268,12 +268,6 @@ class PreProcessor:
                                   4: 'HISP_NR', 5: 'HISP_RC', 6: 'MULT',
                                   7: 'WHITE'}}
 
-            # self.race_others = {'COL': 'RACE', 'TYPE': 'CATEGORICAL', 'STR': 26, 'END': 27,
-            #              'OTHERS': None,
-            #              'VALS': {1: 'AMER', 2: 'ASIA', 3: 'BLACK',
-            #                      4: 'HISP_NR', 5: 'HISP_RC', 6: 'MULT',
-            #                      7: 'WHITE'}}
-
             # SCORE_IS-20_60 , 35.12
             self.score = {'COL': 'SCORE', 'TYPE': 'CONTINIOUS', 'STR': 106, 'END': 111,
                           'MIN': 20.91, 'MAX': 81.04, 'INTERVAL': 5}
@@ -376,5 +370,6 @@ class PreProcessor:
             self.library = {'COL': 'LIBRARY', 'TYPE': 'CATEGORICAL', 'STR': 708, 'END': 709,
                             'OTHERS': {-9: 'MISSING', -7: 'NOT_INTERV', -6: 'MUL_RESP',
                                        -3: 'SKIP_ANS'},
-                            'VALS': {-9: 'MISSING', -6: 'MUL_RESP', -1: 'DONT_K',
+                            'VALS': {-9: 'MISSING', -6: 'MUL_RESP', -1: 'DONT_K', -3: 'SKIP_ANS',
+                                     -7: 'NOT_INTERV',
                                      1: 'NEVER', 2: 'RARELY', 3: 'SOMET', 4: 'OFTEN'}}
