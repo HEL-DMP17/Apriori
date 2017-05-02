@@ -8,7 +8,7 @@
     
     <title>Welcome to Apriori’s documentation! &#8212; Apriori 1.0 documentation</title>
     
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -26,16 +26,21 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
+    <link rel="search" title="Search" href="search.html" /> 
   </head>
   <body role="document">
-  
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">Apriori 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
 
     <div class="document">
       <div class="documentwrapper">
@@ -49,11 +54,19 @@
 </div>
 <div class="section" id="summary">
 <h1>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h1>
-<p>Write some summary about project here</p>
+<p>The project deals with the student-level data (ICPSR 4275) to find
+frequent itemsets and extract associaton rules. We are hoping to find
+social, educational, and cognitive relations. For instance, the students&#8217; performance,
+gender, family income, parents&#8217; education level may correlate with each other.
+In order to do that we are using Apriori algorithm to mine frequent itemsets. We also
+have provided some visualization methods, which are feasible to analyze the results.</p>
 </div>
 <div class="section" id="dataset">
 <h1>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline">¶</a></h1>
-<p>Write something about dataset</p>
+<p>We are using student-level data to study the classic data mining algorithm (Apriori). Briefly,
+the dataset approximately consists of 15000 records and 1600 features. However, we are focused
+only on 16 features. List of selected features could be seen in <code class="docutils literal"><span class="pre">preprocessor.py</span></code> file.</p>
+<p>The dataset can be downloaded from the following link: <a class="reference external" href="http://www.icpsr.umich.edu/icpsrweb/ICPSR/studies/4275">ELS 2002 Dataset</a>.</p>
 </div>
 <div class="section" id="installing-and-running-the-program">
 <h1>Installing and running the program<a class="headerlink" href="#installing-and-running-the-program" title="Permalink to this headline">¶</a></h1>
@@ -84,6 +97,7 @@
 <div class="section" id="results">
 <h1>Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
+<li>Project&#8217;s Wiki page presents the analysis of the results <a class="reference external" href="https://github.com/HEL-DMP17/Apriori/wiki/Analysis-of-the-results">Wiki Page</a>.</li>
 <li>Interactive association rules shown in a table <a class="reference external" href="https://rawgit.com/HEL-DMP17/Apriori/master/analysis/inspectDT.html">inspectDT</a>.</li>
 <li>Visual network of top 50 rules <a class="reference external" href="https://rawgit.com/HEL-DMP17/Apriori/master/analysis/visNetwork.html">visNetwork</a>.</li>
 <li>Scatter plot of all association rules <a class="reference external" href="https://rawgit.com/HEL-DMP17/Apriori/master/analysis/scatterPlotly.html">scatterPlotly</a>.</li>
@@ -106,13 +120,7 @@
 <li><a class="reference internal" href="#source-code-documentation">Source code documentation</a></li>
 <li><a class="reference internal" href="#results">Results</a></li>
 </ul>
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="#">Documentation overview</a><ul>
-  </ul></li>
-</ul>
-</div>
+
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -134,20 +142,21 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="footer">
-      &copy;2017, Ege Can Ozer, Agustin Zuniga.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
-      
-      |
-      <a href="_sources/index.rst.txt"
-          rel="nofollow">Page source</a>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">Apriori 1.0 documentation</a> &#187;</li> 
+      </ul>
     </div>
-
-    
-
-    
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Ege Can Ozer, Agustin Zuniga.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
   </body>
 </html>

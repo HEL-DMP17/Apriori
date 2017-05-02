@@ -1,20 +1,22 @@
 # University of Helsinki - Data mining project 2017
 Ege Can Özer/Agustin Zuñiga
-Project main repository: https://github.com/HEL-DMP17/Apriori
+See the project's main page for full documentation at: https://hel-dmp17.github.io/Apriori/
 
 ## About project
-### Overview
-Our project is related with the student-level data, our goal is to find interesting
-frequent patterns that could be related with things like the students performance,
-social and educational frameworks, depending on the frequent patterns. i.e. the relation
-between scores and gender, family income or parents education level. In order to do that
-we will implement Apriori Algorithm as well as different approaches to handle the different
-kind of attributes of the sample.
+### Summary
+The project deals with the student-level data (ICPSR 4275) to find
+frequent itemsets and extract associaton rules. We are hoping to find
+social, educational, and cognitive relations. For instance, the students' performance, 
+gender, family income, parents' education level may correlate with each other.
+In order to do that we are using Apriori algorithm to mine frequent itemsets. We also
+have provided some visualization methods, which are feasible to analyze the results.
 
 ### Dataset
-The data matrix has 9,679 rows and 17 columns, it does not contain missing values.
-A detailed description of the data set could be find
-in the following link: https://vincentarelbundock.github.io/Rdatasets/doc/mediation/student.html
+We are using student-level data to study the classic data mining algorithm (Apriori). Briefly,
+the dataset approximately consists of 15000 records and 1600 features. However, we are focused
+only on 16 features. List of selected features could be seen in preprocessor.py file.
+
+The dataset can be downloaded from the following link: http://www.icpsr.umich.edu/icpsrweb/ICPSR/studies/4275
 
 ## How to install
 ### Prerequisites

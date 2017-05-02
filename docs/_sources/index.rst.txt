@@ -12,22 +12,29 @@ Welcome to Apriori's documentation!
 
 Summary
 =======
-
-Write some summary about project here
+The project deals with the student-level data (ICPSR 4275) to find
+frequent itemsets and extract associaton rules. We are hoping to find
+social, educational, and cognitive relations. For instance, the students' performance, 
+gender, family income, parents' education level may correlate with each other.
+In order to do that we are using Apriori algorithm to mine frequent itemsets. We also
+have provided some visualization methods, which are feasible to analyze the results.
 
 Dataset
 =======
+We are using student-level data to study the classic data mining algorithm (Apriori). Briefly,
+the dataset approximately consists of 15000 records and 1600 features. However, we are focused
+only on 16 features. List of selected features could be seen in ``preprocessor.py`` file. 
 
-Write something about dataset
+The dataset can be downloaded from the following link: `ELS 2002 Dataset <http://www.icpsr.umich.edu/icpsrweb/ICPSR/studies/4275>`_.
 
 Installing and running the program
-==================
+==================================
 You can install and run the program from scratch as follows
 ::
-	git clone https://github.com/HEL-DMP17/Apriori.git
-	cd Apriori
-	pip install -r requirements.txt
-	python arules.py
+    git clone https://github.com/HEL-DMP17/Apriori.git
+    cd Apriori
+    pip install -r requirements.txt
+    python arules.py
 
 
 Source code layout
@@ -41,13 +48,13 @@ Source code layout
 * ``utils.py`` - Utility functions are here
 
 Source code documentation
-==================
+=========================
 
 * :ref:`modindex`
 
 Results
 ========
-
+*  Project's Wiki page presents the analysis of the results `Wiki Page <https://github.com/HEL-DMP17/Apriori/wiki/Analysis-of-the-results>`_.
 *  Interactive association rules shown in a table `inspectDT <https://rawgit.com/HEL-DMP17/Apriori/master/analysis/inspectDT.html>`_.
 *  Visual network of top 50 rules `visNetwork <https://rawgit.com/HEL-DMP17/Apriori/master/analysis/visNetwork.html>`_.
 *  Scatter plot of all association rules `scatterPlotly <https://rawgit.com/HEL-DMP17/Apriori/master/analysis/scatterPlotly.html>`_.
